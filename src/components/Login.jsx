@@ -57,7 +57,7 @@ export default function Login({ onLogin }) {
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-green-300 to-emerald-400 
                        bg-clip-text text-transparent">
-            SLAero Operation
+            ALPHOVINS GLOBAL AGRO EXPORTS
           </h1>
           <p className="text-green-500/60 mt-1 text-sm">
             Banana Cultivation Billing System

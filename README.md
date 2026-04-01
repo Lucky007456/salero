@@ -1,4 +1,4 @@
-# 🍌 SLAero Operation - Banana Cultivation Billing System
+# 🍌 ALPHOVINS GLOBAL AGRO EXPORTS - Banana Cultivation Billing System
 
 ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white) 
 ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
@@ -56,4 +56,4 @@ A modern, responsive, and bilingual (English/Tamil) web application built specif
 Please note that all `.env` files containing Firebase API keys and secrets are explicitly ignored via `.gitignore` and **MUST NOT** be pushed to GitHub.
 
 ---
-*Built for SLAero Operation by Lakshmanan R.*
+*Built for ALPHOVINS GLOBAL AGRO EXPORTS by Lakshmanan R.*

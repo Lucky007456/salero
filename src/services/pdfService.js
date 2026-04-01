@@ -22,7 +22,7 @@ export function generateBillPDF(bill) {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.text('SLAERO OPERATION', pageWidth / 2, 18, { align: 'center' });
+  doc.text('ALPHOVINS GLOBAL AGRO EXPORTS', pageWidth / 2, 18, { align: 'center' });
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');

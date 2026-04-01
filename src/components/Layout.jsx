@@ -45,7 +45,7 @@ export default function Layout({ children, currentPage, onNavigate }) {
               <div className="hidden sm:block">
                 <h1 className="text-lg font-bold bg-gradient-to-r from-green-300 to-emerald-400 
                              bg-clip-text text-transparent leading-tight">
-                  SLAero Operation
+                  ALPHOVINS GLOBAL AGRO EXPORTS
                 </h1>
                 <p className="text-[10px] text-green-500/60 -mt-0.5">Banana Billing System</p>
               </div>
