@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  LayoutDashboard, PlusCircle, FileText, LogIn, LogOut, Menu, X, Banana 
+  LayoutDashboard, PlusCircle, FileText, BarChart3, LogIn, LogOut, Menu, X, Banana 
 } from 'lucide-react';
 import { auth, isFirebaseConfigured } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -21,6 +21,7 @@ export default function Layout({ children, currentPage, onNavigate }) {
     { id: 'dashboard', label: LABELS.dashboard.en, tamil: LABELS.dashboard.ta, icon: LayoutDashboard },
     { id: 'new-sale', label: LABELS.newSale.en, tamil: LABELS.newSale.ta, icon: PlusCircle },
     { id: 'history', label: LABELS.billHistory.en, tamil: LABELS.billHistory.ta, icon: FileText },
+    { id: 'sales-stats', label: LABELS.salesStats.en, tamil: LABELS.salesStats.ta, icon: BarChart3 },
   ];
 
   const handleLogout = async () => {
