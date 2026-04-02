@@ -120,6 +120,13 @@ export const LABELS = {
   allMonths: { en: 'All Months', ta: 'அனைத்து மாதங்கள்' },
   monthlySummary: { en: 'Monthly Summary', ta: 'மாத சுருக்கம்' },
   vsLastMonth: { en: 'vs last month', ta: 'கடந்த மாதம் ஒப்பிடுகையில்' },
+  dailyWeightLog: { en: 'Daily Weight Chart', ta: 'நாள்வாரி எடை விவரம்' },
+  monthOverMonth: { en: 'Month Over Month Comparison', ta: 'மாத ஒப்பீடு' },
+  varietyDeepDive: { en: 'Variety Deep Dive Table', ta: 'ரக விவர அட்டவணை' },
+  merchantInsights: { en: 'Merchant Insights Table', ta: 'வணிகர் விவரங்கள்' },
+  financialHealth: { en: 'Financial Health Panel', ta: 'நிதி நிலை' },
+  rateTracker: { en: 'Rate Tracker', ta: 'விலை கண்காணிப்பு' },
+  quickSummary: { en: 'Quick Summary', ta: 'சுருக்க பட்டை' },
 };
 
 // Generate Bill ID

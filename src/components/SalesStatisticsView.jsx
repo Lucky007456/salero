@@ -29,17 +29,10 @@ export default function SalesStatisticsView() {
   const availableMonths = useMemo(() => getAvailableMonths(bills), [bills]);
   const monthBills = useMemo(() => getBillsByMonth(bills, selectedMonth), [bills, selectedMonth]);
 
-  const prevMonthBills = useMemo(() => {
-    if (!selectedMonth) return [];
-    const idx = availableMonths.indexOf(selectedMonth);
-    if (idx < 0 || idx >= availableMonths.length - 1) return [];
-    return getBillsByMonth(bills, availableMonths[idx + 1]);
-  }, [bills, selectedMonth, availableMonths]);
-
   const salesStats = useMemo(() => {
     if (monthBills.length === 0) return null;
-    return getSalesStatistics(monthBills, prevMonthBills);
-  }, [monthBills, prevMonthBills]);
+    return getSalesStatistics(monthBills, bills, selectedMonth);
+  }, [monthBills, bills, selectedMonth]);
 
   const currentMonthLabel = selectedMonth ? formatMonthYear(selectedMonth) : LABELS.allMonths.en;
 

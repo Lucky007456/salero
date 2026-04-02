@@ -71,6 +71,28 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
     });
   }, []);
 
+  const handleWeightKeyDown = useCallback((index, e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      
+      // If it's the last row, add a new one (only if current has some data)
+      if (index === weightEntries.length - 1) {
+        if (weightEntries[index].quantity || weightEntries[index].weight) {
+          addRow();
+          // Focus the next row's quantity input after it renders
+          setTimeout(() => {
+            const nextInput = document.getElementById(`qty-${index + 1}`);
+            if (nextInput) nextInput.focus();
+          }, 50);
+        }
+      } else {
+        // Not the last row, just jump to the next one
+        const nextInput = document.getElementById(`qty-${index + 1}`);
+        if (nextInput) nextInput.focus();
+      }
+    }
+  }, [weightEntries, addRow]);
+
   // ---- VALIDATION ----
   const validate = () => {
     const errs = {};
@@ -344,6 +366,13 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
                   type="number"
                   value={entry.quantity}
                   onChange={(e) => updateEntry(index, 'quantity', e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      const nextInput = document.getElementById(`wt-${index}`);
+                      if (nextInput) nextInput.focus();
+                    }
+                  }}
                   placeholder="Thars"
                   className={`input-field text-center ${errors[`qty_${index}`] ? 'border-red-500/50' : ''}`}
                   min="0"
@@ -357,6 +386,7 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
                   type="number"
                   value={entry.weight}
                   onChange={(e) => updateEntry(index, 'weight', e.target.value)}
+                  onKeyDown={(e) => handleWeightKeyDown(index, e)}
                   placeholder="kg"
                   className={`input-field text-center ${errors[`wt_${index}`] ? 'border-red-500/50' : ''}`}
                   min="0"
