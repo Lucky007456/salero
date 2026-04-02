@@ -43,12 +43,8 @@ export default function Layout({ children, currentPage, onNavigate }) {
                             flex items-center justify-center shadow-glow">
                 <span className="text-xl">🍌</span>
               </div>
-              <div className="hidden sm:block">
-                <h1 className="text-lg font-bold bg-gradient-to-r from-green-300 to-emerald-400 
-                             bg-clip-text text-transparent leading-tight">
-                  ALPHOVINS GLOBAL AGRO EXPORTS
-                </h1>
-                <p className="text-[10px] text-green-500/60 -mt-0.5">Banana Billing System</p>
+              <div className="flex flex-col">
+                <span className="font-bold text-sm sm:text-lg tracking-tight text-green-300">ALPHOVINS GLOBAL AGRO EXPORTS</span>
               </div>
             </div>
 
