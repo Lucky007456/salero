@@ -1,7 +1,26 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { saveAs } from 'file-saver';
-import { formatINR, formatDate, BANANA_VARIETIES } from '../utils/format';
+import { formatDate, BANANA_VARIETIES } from '../utils/format';
+
+// PDF-safe currency formatter (jsPDF's built-in fonts don't support ₹)
+function formatPDFCurrency(amount) {
+  if (amount === null || amount === undefined || isNaN(amount)) return 'Rs. 0.00';
+  const num = Number(amount);
+  const isNegative = num < 0;
+  const absNum = Math.abs(num);
+  const parts = absNum.toFixed(2).split('.');
+  let intPart = parts[0];
+  const decPart = parts[1];
+  if (intPart.length > 3) {
+    const last3 = intPart.slice(-3);
+    const remaining = intPart.slice(0, -3);
+    const formatted = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+    intPart = formatted + ',' + last3;
+  }
+  const result = `Rs. ${intPart}.${decPart}`;
+  return isNegative ? `-${result}` : result;
+}
 
 export function generateBillPDF(bill) {
   const doc = new jsPDF({
@@ -41,40 +60,45 @@ export function generateBillPDF(bill) {
   
   doc.setTextColor(20, 83, 45);
   doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
   
-  doc.text('Bill ID:', margin + 5, y + 8);
+  // Left column — consistent label/value positions
+  const leftLabelX = margin + 5;
+  const leftValueX = margin + 30;
+  
+  doc.setFont('helvetica', 'bold');
+  doc.text('Bill ID:', leftLabelX, y + 8);
   doc.setFont('helvetica', 'normal');
-  doc.text(String(bill.billId || 'N/A'), margin + 28, y + 8);
+  doc.text(String(bill.billId || 'N/A'), leftValueX, y + 8);
   
   doc.setFont('helvetica', 'bold');
-  doc.text('Date:', margin + 5, y + 16);
+  doc.text('Date:', leftLabelX, y + 16);
   doc.setFont('helvetica', 'normal');
-  doc.text(String(formatDate(bill.saleDate)), margin + 22, y + 16);
+  doc.text(String(formatDate(bill.saleDate)), leftValueX, y + 16);
   
   doc.setFont('helvetica', 'bold');
-  doc.text('Merchant:', margin + 5, y + 24);
+  doc.text('Merchant:', leftLabelX, y + 24);
   doc.setFont('helvetica', 'normal');
-  doc.text(String(bill.merchantName || 'N/A'), margin + 32, y + 24);
+  doc.text(String(bill.merchantName || 'N/A'), leftValueX, y + 24);
   
-  // Right side
-  const rightCol = pageWidth / 2 + 10;
+  // Right column — consistent label/value positions
+  const rightLabelX = pageWidth / 2 + 10;
+  const rightValueX = rightLabelX + 25;
   
   doc.setFont('helvetica', 'bold');
-  doc.text('Variety:', rightCol, y + 8);
+  doc.text('Variety:', rightLabelX, y + 8);
   doc.setFont('helvetica', 'normal');
   const variety = BANANA_VARIETIES.find(v => v.value === bill.bananaVariety);
-  doc.text(String(variety ? variety.label : (bill.customVariety || bill.bananaVariety || 'N/A')), rightCol + 22, y + 8);
+  doc.text(String(variety ? variety.label : (bill.customVariety || bill.bananaVariety || 'N/A')), rightValueX, y + 8);
   
   doc.setFont('helvetica', 'bold');
-  doc.text('Status:', rightCol, y + 16);
+  doc.text('Status:', rightLabelX, y + 16);
   doc.setFont('helvetica', 'normal');
   const statusText = bill.paymentStatus === 'paid' ? 'PAID' : 
                      bill.paymentStatus === 'partial' ? 'PARTIAL' : 'PENDING';
   const statusColor = bill.paymentStatus === 'paid' ? [34, 197, 94] : 
                       bill.paymentStatus === 'partial' ? [234, 179, 8] : [239, 68, 68];
   doc.setTextColor(...statusColor);
-  doc.text(statusText, rightCol + 22, y + 16);
+  doc.text(statusText, rightValueX, y + 16);
 
   y += 40;
 
@@ -136,14 +160,14 @@ export function generateBillPDF(bill) {
     ['Gross Weight', `${Number(bill.grossWeight || 0).toFixed(2)} kg`],
     ['Wastage', `${Number(bill.wastage || 0).toFixed(2)} kg`],
     ['Net Weight', `${Number(bill.netWeight || 0).toFixed(2)} kg`],
-    ['Rate per kg', formatINR(bill.ratePerKg || 0)],
-    ['Total Amount', formatINR(bill.totalAmount || 0)],
+    ['Rate per kg', formatPDFCurrency(bill.ratePerKg || 0)],
+    ['Total Amount', formatPDFCurrency(bill.totalAmount || 0)],
   ];
 
   if (bill.paymentStatus === 'partial') {
     summaryData.push(
-      ['Amount Paid', formatINR(bill.amountPaid || 0)],
-      ['Balance Due', formatINR((bill.totalAmount || 0) - (bill.amountPaid || 0))]
+      ['Amount Paid', formatPDFCurrency(bill.amountPaid || 0)],
+      ['Balance Due', formatPDFCurrency((bill.totalAmount || 0) - (bill.amountPaid || 0))]
     );
   }
 
