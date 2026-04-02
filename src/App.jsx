@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from './components/Layout';
 import Login from './components/Login';
 import NewSaleBill from './components/NewSaleBill';
@@ -16,12 +16,28 @@ function App() {
   const [selectedBill, setSelectedBill] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const page = params.get('page');
+    if (['terms', 'privacy', 'refund'].includes(page)) {
+      setCurrentPage(page);
+    }
+  }, []);
+
   const handleLogin = () => {
     setIsLoggedIn(true);
     setCurrentPage('dashboard');
   };
 
   const handleNavigate = (page) => {
+    if (['terms', 'privacy', 'refund'].includes(page)) {
+      window.location.href = `?page=${page}`;
+      return;
+    }
+    // Clear URL params if navigating back to main app
+    if (window.location.search) {
+      window.history.pushState({}, '', window.location.pathname);
+    }
     setCurrentPage(page);
     setSelectedBill(null);
     if (page === 'dashboard' || page === 'history' || page === 'sales-stats') {
@@ -52,7 +68,9 @@ function App() {
     handleBackFromDetail();
   };
 
-  if (!isLoggedIn) {
+  const isPublicPage = ['terms', 'privacy', 'refund'].includes(currentPage);
+
+  if (!isLoggedIn && !isPublicPage) {
     return <Login onLogin={handleLogin} />;
   }
 

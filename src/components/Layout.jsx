@@ -152,15 +152,15 @@ export default function Layout({ children, currentPage, onNavigate }) {
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-4 text-xs font-medium">
-            <button onClick={() => onNavigate('terms')} className="text-green-400/60 hover:text-green-300 transition-colors">
+            <a href="?page=terms" className="text-green-400/60 hover:text-green-300 transition-colors">
               Terms & Conditions
-            </button>
-            <button onClick={() => onNavigate('privacy')} className="text-green-400/60 hover:text-green-300 transition-colors">
+            </a>
+            <a href="?page=privacy" className="text-green-400/60 hover:text-green-300 transition-colors">
               Privacy Policy
-            </button>
-            <button onClick={() => onNavigate('refund')} className="text-green-400/60 hover:text-green-300 transition-colors">
+            </a>
+            <a href="?page=refund" className="text-green-400/60 hover:text-green-300 transition-colors">
               Refund Policy
-            </button>
+            </a>
           </div>
         </div>
       </footer>
