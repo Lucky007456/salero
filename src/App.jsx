@@ -7,6 +7,7 @@ import BillHistory from './components/BillHistory';
 import SalesStatisticsView from './components/SalesStatisticsView';
 import BillDetail from './components/BillDetail';
 import Profile from './components/Profile';
+import { TermsView, PrivacyView, RefundView } from './components/LegalPages';
 import './index.css';
 
 function App() {
@@ -75,6 +76,12 @@ function App() {
         return <SalesStatisticsView key={refreshKey} />;
       case 'profile':
         return <Profile onNavigate={handleNavigate} />;
+      case 'terms':
+        return <TermsView />;
+      case 'privacy':
+        return <PrivacyView />;
+      case 'refund':
+        return <RefundView />;
       case 'dashboard':
       default:
         return <Dashboard key={refreshKey} onViewBill={handleViewBill} onNavigate={handleNavigate} />;

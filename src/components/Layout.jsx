@@ -143,6 +143,28 @@ export default function Layout({ children, currentPage, onNavigate }) {
         {children}
       </main>
 
+      {/* Global Footer (Compliance) */}
+      <footer className="w-full max-w-7xl mx-auto px-4 py-8 border-t border-green-800/30 mt-auto">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="text-center md:text-left">
+            <p className="text-xs text-green-500/50">
+              &copy; {new Date().getFullYear()} ALPHOVINS GLOBAL AGRO EXPORTS. All rights reserved.
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-4 text-xs font-medium">
+            <button onClick={() => onNavigate('terms')} className="text-green-400/60 hover:text-green-300 transition-colors">
+              Terms & Conditions
+            </button>
+            <button onClick={() => onNavigate('privacy')} className="text-green-400/60 hover:text-green-300 transition-colors">
+              Privacy Policy
+            </button>
+            <button onClick={() => onNavigate('refund')} className="text-green-400/60 hover:text-green-300 transition-colors">
+              Refund Policy
+            </button>
+          </div>
+        </div>
+      </footer>
+
       {/* Bottom Mobile Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 
                       bg-green-950/90 backdrop-blur-xl border-t border-green-800/30 
