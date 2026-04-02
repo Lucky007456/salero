@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import BillHistory from './components/BillHistory';
 import SalesStatisticsView from './components/SalesStatisticsView';
 import BillDetail from './components/BillDetail';
+import Profile from './components/Profile';
 import './index.css';
 
 function App() {
@@ -72,6 +73,8 @@ function App() {
         return <BillHistory key={refreshKey} onViewBill={handleViewBill} />;
       case 'sales-stats':
         return <SalesStatisticsView key={refreshKey} />;
+      case 'profile':
+        return <Profile onNavigate={handleNavigate} />;
       case 'dashboard':
       default:
         return <Dashboard key={refreshKey} onViewBill={handleViewBill} onNavigate={handleNavigate} />;

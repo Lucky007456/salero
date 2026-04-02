@@ -1,7 +1,8 @@
 import { formatINR, formatDate, BANANA_VARIETIES } from './format';
+import { getPreferences } from '../services/preferenceService';
 
-export function getWhatsAppShareUrl(billData) {
-  const message = generateWhatsAppMessage(billData);
+export async function getWhatsAppShareUrl(billData) {
+  const message = await generateWhatsAppMessage(billData);
   const encodedMessage = encodeURIComponent(message);
   
   if (billData.merchantPhone && billData.merchantPhone.trim() !== '') {
@@ -19,7 +20,9 @@ export function getWhatsAppShareUrl(billData) {
   return `https://wa.me/?text=${encodedMessage}`;
 }
 
-export function generateWhatsAppMessage(bill) {
+export async function generateWhatsAppMessage(bill) {
+  const prefs = await getPreferences();
+  
   const varietyLabel = bill.bananaVariety === 'custom' 
     ? bill.customVariety 
     : BANANA_VARIETIES.find(v => v.value === bill.bananaVariety)?.label || 'Unknown';
@@ -80,6 +83,10 @@ export function generateWhatsAppMessage(bill) {
   }
 
   txt += `${divider}\n`;
+  if (prefs.whatsappGreeting && prefs.whatsappGreeting.trim()) {
+    txt += `💬 ${prefs.whatsappGreeting}\n`;
+    txt += `${divider}\n`;
+  }
   txt += `_ALPHOVINS GLOBAL AGRO EXPORTS_\n`;
   txt += `_Generated on ${timestamp}_\n`;
 

@@ -8,6 +8,7 @@ import {
   formatINR, getTodayForInput, isPositiveNumber, isNonNegativeNumber 
 } from '../utils/format';
 import { saveBill } from '../services/billService';
+import { getPreferences } from '../services/preferenceService';
 import WhatsAppShareButton from './WhatsAppShareButton';
 
 const INITIAL_WEIGHT_ROW = { quantity: '', weight: '' };
@@ -28,6 +29,15 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
   const [saving, setSaving] = useState(false);
   const [savedBill, setSavedBill] = useState(null);
   const [errors, setErrors] = useState({});
+
+  React.useEffect(() => {
+    if (!editBill) {
+      getPreferences().then(prefs => {
+        if (prefs.defaultVariety) setBananaVariety(prefs.defaultVariety);
+        if (prefs.defaultRate) setRatePerKg(prefs.defaultRate);
+      });
+    }
+  }, [editBill]);
 
   // ---- CALCULATIONS ----
   const totalQuantity = useMemo(() => {
@@ -182,6 +192,10 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
     setAmountPaid('');
     setSavedBill(null);
     setErrors({});
+    getPreferences().then(prefs => {
+      if (prefs.defaultVariety) setBananaVariety(prefs.defaultVariety);
+      if (prefs.defaultRate) setRatePerKg(prefs.defaultRate);
+    });
   };
 
   // ---- SUCCESS VIEW ----

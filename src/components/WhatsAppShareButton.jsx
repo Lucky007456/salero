@@ -29,7 +29,7 @@ export default function WhatsAppShareButton({ bill, variant = 'pill', className 
       const filename = buildFilename(bill);
       const file = new File([pdfBlob], filename, { type: 'application/pdf' });
       
-      const messageText = generateWhatsAppMessage(bill);
+      const messageText = await generateWhatsAppMessage(bill);
 
       // Check if native sharing supports files (works great on Mobile)
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -47,7 +47,7 @@ export default function WhatsAppShareButton({ bill, variant = 'pill', className 
     }
 
     // Fallback exactly to the classic web approach (but it only sends text)
-    const url = getWhatsAppShareUrl(bill);
+    const url = await getWhatsAppShareUrl(bill);
     window.open(url, '_blank');
   };
 

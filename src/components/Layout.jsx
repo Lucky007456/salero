@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  LayoutDashboard, PlusCircle, FileText, BarChart3, LogIn, LogOut, Menu, X, Banana 
+  LayoutDashboard, PlusCircle, FileText, BarChart3, LogIn, LogOut, Menu, X, Banana, User 
 } from 'lucide-react';
 import { auth, isFirebaseConfigured } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -68,11 +68,19 @@ export default function Layout({ children, currentPage, onNavigate }) {
             </nav>
 
             {/* Right side */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {user && (
-                <span className="hidden sm:block text-xs text-green-500/50">
-                  {user.email}
-                </span>
+                <button 
+                  onClick={() => onNavigate('profile')}
+                  className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors ${
+                    currentPage === 'profile' 
+                      ? 'bg-green-600/20 text-green-300 border-green-600/30' 
+                      : 'border-transparent text-green-500/70 hover:bg-green-900/40 hover:text-green-300'
+                  }`}
+                >
+                  <User size={16} />
+                  <span className="text-xs font-medium">Profile</span>
+                </button>
               )}
               {/* Mobile menu button */}
               <button 
@@ -107,6 +115,24 @@ export default function Layout({ children, currentPage, onNavigate }) {
                   </div>
                 </button>
               ))}
+              
+              {user && (
+                 <button
+                  onClick={() => { onNavigate('profile'); setMobileMenuOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left border-t border-green-800/20 mt-2
+                    transition-all duration-200 ${
+                    currentPage === 'profile'
+                      ? 'bg-green-600/20 text-green-300'
+                      : 'text-green-400/60 hover:text-green-300 hover:bg-green-900/30'
+                  }`}
+                >
+                  <User size={20} />
+                  <div>
+                    <span className="block font-medium">Admin Profile</span>
+                    <span className="block text-xs text-green-600/50">சுயவிவரம்</span>
+                  </div>
+                </button>
+              )}
             </nav>
           </div>
         )}
