@@ -8,6 +8,7 @@ import {
   formatINR, formatDate, formatMonthYear,
   BANANA_VARIETIES, PAYMENT_STATUSES, LABELS 
 } from '../utils/format';
+import WhatsAppShareButton from './WhatsAppShareButton';
 
 export default function BillHistory({ onViewBill }) {
   const [bills, setBills] = useState([]);
@@ -250,6 +251,7 @@ export default function BillHistory({ onViewBill }) {
                             >
                               <Download size={16} />
                             </button>
+                            <WhatsAppShareButton bill={bill} variant="icon" className="!w-8 !h-8" />
                           </div>
                         </td>
                       </tr>
@@ -279,9 +281,10 @@ export default function BillHistory({ onViewBill }) {
                           {formatDate(bill.saleDate)} · {getVarietyLabel(bill.bananaVariety)}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex flex-col items-end">
                         <p className="text-green-200 font-bold">{formatINR(bill.totalAmount)}</p>
-                        <p className="text-green-500/40 text-xs">{(bill.netWeight || 0).toFixed(1)} kg</p>
+                        <p className="text-green-500/40 text-xs mb-2">{(bill.netWeight || 0).toFixed(1)} kg</p>
+                        <WhatsAppShareButton bill={bill} variant="icon" className="!w-8 !h-8" />
                       </div>
                     </div>
                   </div>

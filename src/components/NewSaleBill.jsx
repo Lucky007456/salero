@@ -8,11 +8,13 @@ import {
   formatINR, getTodayForInput, isPositiveNumber, isNonNegativeNumber 
 } from '../utils/format';
 import { saveBill } from '../services/billService';
+import WhatsAppShareButton from './WhatsAppShareButton';
 
 const INITIAL_WEIGHT_ROW = { quantity: '', weight: '' };
 
 export default function NewSaleBill({ onBillSaved, editBill = null }) {
   const [merchantName, setMerchantName] = useState(editBill?.merchantName || '');
+  const [merchantPhone, setMerchantPhone] = useState(editBill?.merchantPhone || '');
   const [saleDate, setSaleDate] = useState(editBill?.saleDate || getTodayForInput());
   const [bananaVariety, setBananaVariety] = useState(editBill?.bananaVariety || '');
   const [customVariety, setCustomVariety] = useState(editBill?.customVariety || '');
@@ -140,6 +142,7 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
     try {
       const billData = {
         merchantName: merchantName.trim(),
+        merchantPhone: merchantPhone.trim(),
         saleDate,
         bananaVariety,
         customVariety: bananaVariety === 'custom' ? customVariety.trim() : '',
@@ -168,6 +171,7 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
 
   const handleNewBill = () => {
     setMerchantName('');
+    setMerchantPhone('');
     setSaleDate(getTodayForInput());
     setBananaVariety('');
     setCustomVariety('');
@@ -207,7 +211,7 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+          <div className="mt-4 flex flex-col sm:flex-row gap-3">
             <button onClick={handleNewBill} className="btn-primary flex-1">
               <Plus size={20} />
               New Bill
@@ -218,6 +222,10 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
             >
               View in History
             </button>
+          </div>
+
+          <div className="mt-6 animate-bounce">
+            <WhatsAppShareButton bill={savedBill} variant="pill" />
           </div>
         </div>
       </div>
@@ -270,6 +278,20 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
               id="merchant-name"
             />
             {errors.merchantName && <p className="text-red-400 text-xs mt-1">{errors.merchantName}</p>}
+          </div>
+
+          <div>
+            <label className="label-text">
+              Merchant Phone <span className="label-tamil">தொலைபேசி (Optional)</span>
+            </label>
+            <input
+              type="tel"
+              value={merchantPhone}
+              onChange={(e) => setMerchantPhone(e.target.value)}
+              placeholder="e.g. 9876543210"
+              className="input-field"
+              id="merchant-phone"
+            />
           </div>
 
           <div>

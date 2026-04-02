@@ -212,7 +212,7 @@ export function generateBillPDF(bill) {
 }
 
 // Build a clean filename: BILL-2026-001_Kumar_Traders.pdf
-function buildFilename(bill) {
+export function buildFilename(bill) {
   const billId = bill.billId || 'bill';
   const merchant = (bill.merchantName || 'unknown')
     .replace(/[^a-zA-Z0-9\s]/g, '')

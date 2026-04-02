@@ -7,6 +7,7 @@ import {
 } from '../utils/format';
 import { updateBill, deleteBill } from '../services/billService';
 import { downloadBillPDF } from '../services/pdfService';
+import WhatsAppShareButton from './WhatsAppShareButton';
 
 export default function BillDetail({ bill, onBack, onUpdate }) {
   const [editing, setEditing] = useState(false);
@@ -270,6 +271,11 @@ export default function BillDetail({ bill, onBack, onUpdate }) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Share Section */}
+      <div className="mt-4">
+        <WhatsAppShareButton bill={bill} variant="pill" />
       </div>
 
       {/* Delete */}
