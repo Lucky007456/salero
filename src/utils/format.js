@@ -110,6 +110,16 @@ export const LABELS = {
   filterByMerchant: { en: 'Filter by Merchant', ta: 'வணிகர் மூலம் வடிகட்டு' },
   filterByStatus: { en: 'Filter by Status', ta: 'நிலை மூலம் வடிகட்டு' },
   dateRange: { en: 'Date Range', ta: 'தேதி வரம்பு' },
+  monthlyRevenue: { en: 'Monthly Revenue', ta: 'மாத வருமானம்' },
+  topVarieties: { en: 'Top Varieties', ta: 'முதன்மை ரகங்கள்' },
+  topMerchants: { en: 'Top Merchants', ta: 'முதன்மை வணிகர்கள்' },
+  paymentBreakdown: { en: 'Payment Breakdown', ta: 'பணம் பிரிப்பு' },
+  avgRate: { en: 'Avg Rate/kg', ta: 'சராசரி விலை/கிலோ' },
+  dailyTrend: { en: 'Daily Trend', ta: 'தினசரி போக்கு' },
+  salesStats: { en: 'Sales Statistics', ta: 'விற்பனை புள்ளிவிவரங்கள்' },
+  allMonths: { en: 'All Months', ta: 'அனைத்து மாதங்கள்' },
+  monthlySummary: { en: 'Monthly Summary', ta: 'மாத சுருக்கம்' },
+  vsLastMonth: { en: 'vs last month', ta: 'கடந்த மாதம் ஒப்பிடுகையில்' },
 };
 
 // Generate Bill ID
@@ -129,4 +139,31 @@ export function isPositiveNumber(val) {
 export function isNonNegativeNumber(val) {
   const num = Number(val);
   return !isNaN(num) && num >= 0;
+}
+
+// Get month key from date string: "2026-04-15" → "2026-04"
+export function getMonthKey(dateStr) {
+  if (!dateStr) return '';
+  const d = dateStr instanceof Date ? dateStr : new Date(dateStr);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  return `${y}-${m}`;
+}
+
+// Format month key for display: "2026-04" → "Apr 2026"
+export function formatMonthYear(monthKey) {
+  if (!monthKey) return '';
+  const [year, month] = monthKey.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[parseInt(month, 10) - 1]} ${year}`;
+}
+
+// Format compact number: 145000 → "1.45L"
+export function formatCompactINR(amount) {
+  if (!amount || isNaN(amount)) return '₹0';
+  const num = Number(amount);
+  if (num >= 10000000) return `₹${(num / 10000000).toFixed(2)}Cr`;
+  if (num >= 100000) return `₹${(num / 100000).toFixed(2)}L`;
+  if (num >= 1000) return `₹${(num / 1000).toFixed(1)}K`;
+  return formatINR(num);
 }

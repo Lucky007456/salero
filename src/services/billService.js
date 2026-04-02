@@ -4,7 +4,7 @@ import {
   Timestamp, serverTimestamp 
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../firebase';
-import { generateBillId } from '../utils/format';
+import { generateBillId, getMonthKey } from '../utils/format';
 
 const BILLS_COLLECTION = 'bills';
 const COUNTERS_COLLECTION = 'counters';
@@ -198,5 +198,94 @@ export async function getDashboardSummary(bills = null) {
     pendingPayments,
     totalBillsThisMonth,
     totalBills: bills.length,
+  };
+}
+
+// Get sorted list of months that have bills
+export function getAvailableMonths(bills) {
+  const monthSet = new Set();
+  bills.forEach(b => {
+    if (b.saleDate) monthSet.add(getMonthKey(b.saleDate));
+  });
+  return Array.from(monthSet).sort((a, b) => b.localeCompare(a));
+}
+
+// Get bills filtered by month key ("YYYY-MM") or all if null
+export function getBillsByMonth(bills, monthKey) {
+  if (!monthKey) return bills;
+  return bills.filter(b => getMonthKey(b.saleDate) === monthKey);
+}
+
+// Get comprehensive sales statistics for a set of bills
+export function getSalesStatistics(monthBills, prevMonthBills = []) {
+  // Revenue
+  const totalRevenue = monthBills.reduce((s, b) => s + (b.totalAmount || 0), 0);
+  const prevRevenue = prevMonthBills.reduce((s, b) => s + (b.totalAmount || 0), 0);
+  const revenueChange = prevRevenue > 0 ? ((totalRevenue - prevRevenue) / prevRevenue) * 100 : null;
+
+  // Total kg
+  const totalKg = monthBills.reduce((s, b) => s + (b.netWeight || 0), 0);
+  const prevKg = prevMonthBills.reduce((s, b) => s + (b.netWeight || 0), 0);
+
+  // Avg rate per kg
+  const avgRatePerKg = totalKg > 0 ? totalRevenue / totalKg : 0;
+  const prevAvgRate = prevKg > 0 ? prevRevenue / prevKg : 0;
+
+  // Variety breakdown
+  const varietyMap = {};
+  monthBills.forEach(b => {
+    const v = b.bananaVariety || 'unknown';
+    if (!varietyMap[v]) varietyMap[v] = { variety: v, kg: 0, revenue: 0, count: 0 };
+    varietyMap[v].kg += (b.netWeight || 0);
+    varietyMap[v].revenue += (b.totalAmount || 0);
+    varietyMap[v].count += 1;
+  });
+  const varietyBreakdown = Object.values(varietyMap).sort((a, b) => b.kg - a.kg);
+
+  // Merchant leaderboard
+  const merchantMap = {};
+  monthBills.forEach(b => {
+    const name = b.merchantName || 'Unknown';
+    if (!merchantMap[name]) merchantMap[name] = { name, revenue: 0, kg: 0, billCount: 0 };
+    merchantMap[name].revenue += (b.totalAmount || 0);
+    merchantMap[name].kg += (b.netWeight || 0);
+    merchantMap[name].billCount += 1;
+  });
+  const merchantLeaderboard = Object.values(merchantMap).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+
+  // Payment breakdown
+  const paymentBreakdown = { paid: { count: 0, amount: 0 }, partial: { count: 0, amount: 0 }, pending: { count: 0, amount: 0 } };
+  monthBills.forEach(b => {
+    const status = b.paymentStatus || 'pending';
+    if (paymentBreakdown[status]) {
+      paymentBreakdown[status].count += 1;
+      paymentBreakdown[status].amount += (b.totalAmount || 0);
+    }
+  });
+
+  // Daily trend
+  const dailyMap = {};
+  monthBills.forEach(b => {
+    const day = b.saleDate || '';
+    if (!dailyMap[day]) dailyMap[day] = { date: day, revenue: 0, kg: 0, count: 0 };
+    dailyMap[day].revenue += (b.totalAmount || 0);
+    dailyMap[day].kg += (b.netWeight || 0);
+    dailyMap[day].count += 1;
+  });
+  const dailyTrend = Object.values(dailyMap).sort((a, b) => a.date.localeCompare(b.date));
+
+  return {
+    totalRevenue,
+    prevRevenue,
+    revenueChange,
+    totalKg,
+    prevKg,
+    avgRatePerKg,
+    prevAvgRate,
+    billCount: monthBills.length,
+    varietyBreakdown,
+    merchantLeaderboard,
+    paymentBreakdown,
+    dailyTrend,
   };
 }
