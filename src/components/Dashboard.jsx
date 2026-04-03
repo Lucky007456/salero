@@ -85,9 +85,11 @@ export default function Dashboard({ onViewBill, onNavigate }) {
           </div>
           <p className="text-xs text-green-600/30 mb-1">{LABELS.totalSales.ta}</p>
           <p className="summary-value text-xl sm:text-2xl">
-            {formatINR(summary?.totalSalesThisMonth || 0)}
+            {formatINR(summary?.totalSales || 0)}
           </p>
-          <p className="text-[10px] text-green-600/40 mt-1">This month</p>
+          <p className="text-[10px] text-green-600/40 mt-1">
+            {formatINR(summary?.totalSalesThisMonth || 0)} this month
+          </p>
         </div>
 
         <div className="glass-card p-4 sm:p-5">
@@ -101,7 +103,9 @@ export default function Dashboard({ onViewBill, onNavigate }) {
           <p className="summary-value text-xl sm:text-2xl">
             {(summary?.totalKgSold || 0).toFixed(0)} kg
           </p>
-          <p className="text-[10px] text-green-600/40 mt-1">This month</p>
+          <p className="text-[10px] text-green-600/40 mt-1">
+            {(summary?.totalKgSoldThisMonth || 0).toFixed(0)} kg this month
+          </p>
         </div>
 
         <div className="glass-card p-4 sm:p-5">

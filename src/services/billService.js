@@ -169,7 +169,6 @@ export async function deleteBill(docId) {
   return true;
 }
 
-// Get dashboard summary for current month
 export async function getDashboardSummary(bills = null) {
   if (!bills) {
     bills = await getAllBills();
@@ -181,7 +180,12 @@ export async function getDashboardSummary(bills = null) {
   const monthBills = bills.filter(b => new Date(b.saleDate) >= startOfMonth);
   
   const totalSalesThisMonth = monthBills.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
-  const totalKgSold = monthBills.reduce((sum, b) => sum + (b.netWeight || 0), 0);
+  const totalKgSoldThisMonth = monthBills.reduce((sum, b) => sum + (b.netWeight || 0), 0);
+  const totalBillsThisMonth = monthBills.length;
+
+  const totalSales = bills.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+  const totalKgSold = bills.reduce((sum, b) => sum + (b.netWeight || 0), 0);
+
   const pendingPayments = bills
     .filter(b => b.paymentStatus === 'pending' || b.paymentStatus === 'partial')
     .reduce((sum, b) => {
@@ -189,12 +193,12 @@ export async function getDashboardSummary(bills = null) {
       if (b.paymentStatus === 'partial') return sum + ((b.totalAmount || 0) - (b.amountPaid || 0));
       return sum;
     }, 0);
-
-  const totalBillsThisMonth = monthBills.length;
   
   return {
-    totalSalesThisMonth,
+    totalSales,
     totalKgSold,
+    totalSalesThisMonth,
+    totalKgSoldThisMonth,
     pendingPayments,
     totalBillsThisMonth,
     totalBills: bills.length,
