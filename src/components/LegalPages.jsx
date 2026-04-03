@@ -1,15 +1,23 @@
 import React from 'react';
-import { ArrowLeft, Shield, FileText, RefreshCcw } from 'lucide-react';
+import { ArrowLeft, Shield, FileText, RefreshCcw, X } from 'lucide-react';
 
-const PageLayout = ({ icon: Icon, title, lastUpdated, children }) => {
+const PageLayout = ({ icon: Icon, title, lastUpdated, children, onNavigate }) => {
   return (
-    <div className="max-w-4xl mx-auto space-y-6 slide-up pb-8">
-      <div className="glass-card p-8">
+    <div className="max-w-4xl mx-auto space-y-6 slide-up pb-8 relative pt-2">
+      <button 
+        onClick={() => onNavigate && onNavigate('dashboard')}
+        className="absolute top-2 right-2 sm:right-0 w-10 h-10 rounded-full bg-green-900/30 border border-green-800/30 flex items-center justify-center text-green-400/70 hover:bg-green-800/50 hover:text-green-300 transition-colors z-10"
+        title="Close"
+      >
+        <X size={20} />
+      </button>
+
+      <div className="glass-card p-8 group relative overflow-hidden">
         <div className="flex items-center gap-4 mb-6 pb-6 border-b border-green-800/30">
           <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
             <Icon size={24} className="text-green-400" />
           </div>
-          <div>
+          <div className="pr-12">
             <h1 className="text-2xl sm:text-3xl font-bold text-green-200">{title}</h1>
             <p className="text-sm text-green-500/50 mt-1">Last Updated: {lastUpdated}</p>
           </div>
@@ -23,8 +31,8 @@ const PageLayout = ({ icon: Icon, title, lastUpdated, children }) => {
   );
 };
 
-export const TermsView = () => (
-  <PageLayout icon={FileText} title="Terms & Conditions" lastUpdated="April 2026">
+export const TermsView = ({ onNavigate }) => (
+  <PageLayout icon={FileText} title="Terms & Conditions" lastUpdated="April 2026" onNavigate={onNavigate}>
     <h3>1. Acceptance of Terms</h3>
     <p>
       By accessing or using the ALPHOVINS GLOBAL AGRO EXPORTS wholesale billing application 
@@ -63,8 +71,8 @@ export const TermsView = () => (
   </PageLayout>
 );
 
-export const PrivacyView = () => (
-  <PageLayout icon={Shield} title="Privacy Policy" lastUpdated="April 2026">
+export const PrivacyView = ({ onNavigate }) => (
+  <PageLayout icon={Shield} title="Privacy Policy" lastUpdated="April 2026" onNavigate={onNavigate}>
     <h3>1. Information Collection</h3>
     <p>
       We collect minimal necessary business data to facilitate direct wholesale agricultural trades. 
@@ -103,8 +111,8 @@ export const PrivacyView = () => (
   </PageLayout>
 );
 
-export const RefundView = () => (
-  <PageLayout icon={RefreshCcw} title="Cancellation & Refund Policy" lastUpdated="April 2026">
+export const RefundView = ({ onNavigate }) => (
+  <PageLayout icon={RefreshCcw} title="Cancellation & Refund Policy" lastUpdated="April 2026" onNavigate={onNavigate}>
     <h3>1. Nature of Goods</h3>
     <p>
       ALPHOVINS GLOBAL AGRO EXPORTS primarily deals in raw, wholesale agricultural produce (Bananas), 

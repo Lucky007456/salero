@@ -95,11 +95,11 @@ function App() {
       case 'profile':
         return <Profile onNavigate={handleNavigate} />;
       case 'terms':
-        return <TermsView />;
+        return <TermsView onNavigate={handleNavigate} />;
       case 'privacy':
-        return <PrivacyView />;
+        return <PrivacyView onNavigate={handleNavigate} />;
       case 'refund':
-        return <RefundView />;
+        return <RefundView onNavigate={handleNavigate} />;
       case 'dashboard':
       default:
         return <Dashboard key={refreshKey} onViewBill={handleViewBill} onNavigate={handleNavigate} />;
