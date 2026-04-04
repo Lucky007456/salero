@@ -2,6 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { saveAs } from 'file-saver';
 import { formatDate, BANANA_VARIETIES } from '../utils/format';
+import { getPreferences } from './preferenceService';
 
 // PDF-safe currency formatter (jsPDF's built-in fonts don't support ₹)
 function formatPDFCurrency(amount) {
@@ -22,7 +23,15 @@ function formatPDFCurrency(amount) {
   return isNegative ? `-${result}` : result;
 }
 
-export function generateBillPDF(bill) {
+export function generateBillPDF(bill, traderInfo = null) {
+  // Use provided traderInfo or fallback to defaults
+  const trader = traderInfo || {
+    traderName: 'ALPHOVINS GLOBAL AGRO EXPORTS',
+    traderPhone: '8012111116',
+    traderAddress: '123, Banana Street, Tamil Nadu, India',
+    traderEmail: 'admin@salero.com'
+  };
+
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -39,17 +48,18 @@ export function generateBillPDF(bill) {
   doc.rect(0, 0, pageWidth, 45, 'F');
   
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
+  doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
-  doc.text('ALPHOVINS GLOBAL AGRO EXPORTS', pageWidth / 2, 18, { align: 'center' });
+  doc.text(String(trader.traderName).toUpperCase(), pageWidth / 2, 18, { align: 'center' });
   
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
-  doc.text('Banana Cultivation & Trading | Tamil Nadu, India', pageWidth / 2, 26, { align: 'center' });
+  doc.text(String(trader.traderAddress), pageWidth / 2, 26, { align: 'center' });
+  doc.text(`Phone: ${trader.traderPhone} | Email: ${trader.traderEmail}`, pageWidth / 2, 31, { align: 'center' });
   
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
-  doc.text('SALE BILL', pageWidth / 2, 38, { align: 'center' });
+  doc.text('SALE BILL', pageWidth / 2, 40, { align: 'center' });
 
   y = 55;
 
@@ -221,9 +231,10 @@ export function buildFilename(bill) {
   return `${billId}_${merchant}.pdf`;
 }
 
-export function downloadBillPDF(bill) {
+export async function downloadBillPDF(bill) {
   try {
-    const doc = generateBillPDF(bill);
+    const prefs = await getPreferences();
+    const doc = generateBillPDF(bill, prefs);
     const filename = buildFilename(bill);
     const blob = new Blob([doc.output('arraybuffer')], { type: 'application/pdf' });
     const blobUrl = URL.createObjectURL(blob);
@@ -258,7 +269,8 @@ export function downloadBillPDF(bill) {
   }
 }
 
-export function getBillPDFBlob(bill) {
-  const doc = generateBillPDF(bill);
+export async function getBillPDFBlob(bill) {
+  const prefs = await getPreferences();
+  const doc = generateBillPDF(bill, prefs);
   return new Blob([doc.output('arraybuffer')], { type: 'application/pdf' });
 }

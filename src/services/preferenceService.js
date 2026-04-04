@@ -8,7 +8,12 @@ const DEFAULT_PREFERENCES = {
   language: 'en', // 'en' or 'ta'
   defaultRate: '',
   defaultVariety: '',
-  whatsappGreeting: '',
+  defaultWastage: '0.00',
+  traderName: 'ALPHOVINS GLOBAL AGRO EXPORTS',
+  traderPhone: '8012111116',
+  traderEmail: 'admin@salero.com',
+  traderAddress: '123, Banana Street, Tamil Nadu, India',
+  whatsappGreeting: 'Thanks for doing business with ALPHOVINS!',
 };
 
 // ---- LOCAL STORAGE FALLBACK ----

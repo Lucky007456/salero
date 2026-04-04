@@ -31,7 +31,8 @@ function App() {
 
   const handleNavigate = (page) => {
     if (['terms', 'privacy', 'refund'].includes(page)) {
-      window.location.href = `?page=${page}`;
+      window.history.pushState({}, '', `?page=${page}`);
+      setCurrentPage(page);
       return;
     }
     // Clear URL params if navigating back to main app

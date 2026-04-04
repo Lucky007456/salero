@@ -35,6 +35,7 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
       getPreferences().then(prefs => {
         if (prefs.defaultVariety) setBananaVariety(prefs.defaultVariety);
         if (prefs.defaultRate) setRatePerKg(prefs.defaultRate);
+        if (prefs.defaultWastage) setWastage(prefs.defaultWastage);
       });
     }
   }, [editBill]);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, User, Settings, Globe, LogOut } from 'lucide-react';
+import { Save, User, Settings, Globe, LogOut, MapPin, Phone, Building, Mail, Hash } from 'lucide-react';
 import { getPreferences, savePreferences } from '../services/preferenceService';
 import { auth, isFirebaseConfigured } from '../firebase';
 import { signOut } from 'firebase/auth';
@@ -10,6 +10,11 @@ export default function Profile({ onNavigate }) {
     language: 'en',
     defaultRate: '',
     defaultVariety: '',
+    defaultWastage: '',
+    traderName: '',
+    traderPhone: '',
+    traderEmail: '',
+    traderAddress: '',
     whatsappGreeting: '',
   });
   const [loading, setLoading] = useState(true);
@@ -129,6 +134,77 @@ export default function Profile({ onNavigate }) {
                 ))}
               </select>
             </div>
+            
+            {/* Default Wastage */}
+            <div>
+              <label className="label-text flex items-center gap-1.5">
+                <Hash size={14} /> Default Wastage (kg)
+              </label>
+              <input
+                type="number"
+                value={prefs.defaultWastage}
+                onChange={(e) => setPrefs({ ...prefs, defaultWastage: e.target.value })}
+                placeholder="e.g. 0.5"
+                className="input-field"
+                step="0.01"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-green-800/20">
+            <Building size={18} className="text-green-400/70" />
+            <h4 className="text-sm font-semibold text-green-400/80">Business / Trader Details</h4>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label-text flex items-center gap-1.5">
+                  <Building size={14} /> Business/Trader Name
+                </label>
+                <input
+                  type="text"
+                  value={prefs.traderName}
+                  onChange={(e) => setPrefs({ ...prefs, traderName: e.target.value })}
+                  placeholder="e.g. ALPHOVINS..."
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="label-text flex items-center gap-1.5">
+                  <Phone size={14} /> Contact Phone
+                </label>
+                <input
+                  type="tel"
+                  value={prefs.traderPhone}
+                  onChange={(e) => setPrefs({ ...prefs, traderPhone: e.target.value })}
+                  placeholder="e.g. 9876543210"
+                  className="input-field"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label-text flex items-center gap-1.5">
+                  <Mail size={14} /> Business Email
+                </label>
+                <input
+                  type="email"
+                  value={prefs.traderEmail}
+                  onChange={(e) => setPrefs({ ...prefs, traderEmail: e.target.value })}
+                  placeholder="e.g. mail@alphovins.com"
+                  className="input-field"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label-text flex items-center gap-1.5">
+                  <MapPin size={14} /> Business Address
+                </label>
+                <input
+                  type="text"
+                  value={prefs.traderAddress}
+                  onChange={(e) => setPrefs({ ...prefs, traderAddress: e.target.value })}
+                  placeholder="e.g. 123, Main Street..."
+                  className="input-field"
+                />
+              </div>
           </div>
 
           {/* WhatsApp Custom Greeting */}
