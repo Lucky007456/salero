@@ -14,6 +14,10 @@ const DEFAULT_PREFERENCES = {
   traderEmail: 'admin@salero.com',
   traderAddress: '123, Banana Street, Tamil Nadu, India',
   whatsappGreeting: 'Thanks for doing business with ALPHOVINS!',
+  bankName: '',
+  bankAccount: '',
+  bankIfsc: '',
+  upiId: '',
 };
 
 // ---- LOCAL STORAGE FALLBACK ----

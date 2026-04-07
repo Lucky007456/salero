@@ -16,6 +16,10 @@ export default function Profile({ onNavigate }) {
     traderEmail: '',
     traderAddress: '',
     whatsappGreeting: '',
+    bankName: '',
+    bankAccount: '',
+    bankIfsc: '',
+    upiId: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -206,6 +210,54 @@ export default function Profile({ onNavigate }) {
                   onChange={(e) => setPrefs({ ...prefs, traderAddress: e.target.value })}
                   placeholder="e.g. 123, Main Street..."
                   className="input-field"
+                />
+              </div>
+          </div>
+
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-green-800/20">
+            <span className="text-xl">💳</span>
+            <h4 className="text-sm font-semibold text-green-400/80">Payment & Bank Details (For Invoices)</h4>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <label className="label-text">Business UPI ID</label>
+                <input
+                  type="text"
+                  value={prefs.upiId || ''}
+                  onChange={(e) => setPrefs({ ...prefs, upiId: e.target.value })}
+                  placeholder="e.g. alphovins@ybl"
+                  className="input-field border-green-500/30 bg-green-900/10 placeholder:text-green-700/50"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label-text">Bank Name</label>
+                <input
+                  type="text"
+                  value={prefs.bankName || ''}
+                  onChange={(e) => setPrefs({ ...prefs, bankName: e.target.value })}
+                  placeholder="e.g. State Bank of India"
+                  className="input-field border-green-500/30 bg-green-900/10 placeholder:text-green-700/50"
+                />
+              </div>
+              <div>
+                <label className="label-text">Account Number</label>
+                <input
+                  type="text"
+                  value={prefs.bankAccount || ''}
+                  onChange={(e) => setPrefs({ ...prefs, bankAccount: e.target.value })}
+                  placeholder="e.g. 000000123456789"
+                  className="input-field border-green-500/30 bg-green-900/10 placeholder:text-green-700/50"
+                />
+              </div>
+              <div>
+                <label className="label-text">IFSC Code</label>
+                <input
+                  type="text"
+                  value={prefs.bankIfsc || ''}
+                  onChange={(e) => setPrefs({ ...prefs, bankIfsc: e.target.value })}
+                  placeholder="e.g. SBIN0001234"
+                  className="input-field border-green-500/30 bg-green-900/10 placeholder:text-green-700/50"
                 />
               </div>
           </div>

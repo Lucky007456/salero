@@ -206,6 +206,38 @@ export function generateBillPDF(bill, traderInfo = null) {
 
   y = doc.lastAutoTable.finalY + 15;
 
+  // ---- PAYMENT DETAILS BOX ----
+  if (trader.bankName || trader.bankAccount || trader.upiId) {
+    doc.setDrawColor(200, 225, 200); // light green border
+    doc.setFillColor(245, 255, 245);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(margin, y, contentWidth, 22, 2, 2, 'FD');
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(20, 83, 45);
+    doc.text('PAYMENT DETAILS', margin + 5, y + 6);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    
+    if (trader.bankName || trader.bankAccount) {
+      const bankText = `Bank: ${trader.bankName || 'N/A'}`;
+      const accText = `A/c No: ${trader.bankAccount || 'N/A'}    IFSC: ${trader.bankIfsc || 'N/A'}`;
+      doc.text(bankText, margin + 5, y + 12);
+      doc.text(accText, margin + 5, y + 18);
+    }
+    
+    if (trader.upiId) {
+      doc.setFont('helvetica', 'bold');
+      doc.text(`UPI ID:`, pageWidth / 2 + 10, y + 12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${trader.upiId}`, pageWidth / 2 + 10, y + 18);
+    }
+    
+    y += 30;
+  }
+
   // ---- CUSTOM GREETING FLAG ----
   if (trader.whatsappGreeting && trader.whatsappGreeting.trim()) {
     doc.setFontSize(10);
