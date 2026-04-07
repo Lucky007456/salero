@@ -28,67 +28,26 @@ export async function generateWhatsAppMessage(bill) {
     : BANANA_VARIETIES.find(v => v.value === bill.bananaVariety)?.label || 'Unknown';
 
   const dateStr = formatDate(bill.saleDate);
-  const timestamp = new Date().toLocaleString('en-IN');
 
-  const divider = '———————————————';
-
-  let txt = `🍌 *ALPHOVINS GLOBAL AGRO EXPORTS*\n`;
-  txt += `${divider}\n`;
-  txt += `📋 *Bill No:* ${bill.billId}\n`;
-  txt += `📅 *Date:* ${dateStr}\n`;
-  txt += `👤 *Merchant:* ${bill.merchantName || 'N/A'}\n`;
-  txt += `🍌 *Variety:* ${varietyLabel}\n`;
-  txt += `${divider}\n`;
-  txt += `*WEIGHT DETAILS / எடை விவரம்*\n\n`;
-
-  // ASCII Table for weight entries
-  // Padding logic for neat columns (though WA monospace isn't guaranteed, this is standard)
-  /* 
-    | Qty | Weight |
-    |-----|--------|
-    | 4   | 60 kg  |
-  */
-  // Wait, WhatsApp does not support monospace perfectly unless we use ```, but users prefer normal text tables.
-  txt += `| Qty | Weight |\n`;
-  txt += `|-----|--------|\n`;
-  (bill.weightEntries || []).forEach(e => {
-    const qtyPad = String(e.quantity).padEnd(3, ' ');
-    const wtPad = String(e.weight).padEnd(4, ' ');
-    txt += `| ${qtyPad} | ${wtPad} kg |\n`;
-  });
-  txt += `\n${divider}\n`;
-  txt += `📦 *Total Quantity:* ${bill.totalQuantity} thars\n`;
-  txt += `⚖️ *Gross Weight:* ${(bill.grossWeight || 0).toFixed(2)} kg\n`;
-  if (bill.wastage > 0) {
-    txt += `🗑️ *Wastage:* ${(bill.wastage || 0).toFixed(2)} kg\n`;
-  }
-  txt += `✅ *Net Weight:* ${(bill.netWeight || 0).toFixed(2)} kg\n`;
-  txt += `${divider}\n`;
-  txt += `💰 *Rate:* ${formatINR(bill.ratePerKg)} / kg\n`;
-  txt += `💵 *Total Amount:* ${formatINR(bill.totalAmount)}\n`;
-  txt += `${divider}\n`;
-
-  // Payment Status block
+  let txt = `🍌 *ALPHOVINS GLOBAL AGRO EXPORTS*\n\n`;
+  txt += `Hello ${bill.merchantName || 'Sir/Madam'},\n\n`;
+  txt += `Your bill dated *${dateStr}* (ID: ${bill.billId}) for *${varietyLabel}* has been generated.\n\n`;
+  
   if (bill.paymentStatus === 'paid') {
-    txt += `💳 *Payment Status:* Paid ✅\n`;
-    txt += `💵 *Amount Received:* ${formatINR(bill.totalAmount)}\n`;
+    txt += `💵 *Amount Paid:* ${formatINR(bill.totalAmount)} ✅\n\n`;
   } else if (bill.paymentStatus === 'partial') {
     const balance = (bill.totalAmount || 0) - (bill.amountPaid || 0);
-    txt += `💳 *Payment Status:* Partial ⚠️\n`;
-    txt += `💵 *Amount Paid:* ${formatINR(bill.amountPaid)}\n`;
-    txt += `🔴 *Balance Due:* ${formatINR(balance)}\n`;
+    txt += `💵 *Total Bill:* ${formatINR(bill.totalAmount)}\n`;
+    txt += `🔴 *Balance Due:* ${formatINR(balance)} ⚠️\n\n`;
   } else {
-    txt += `💳 *Payment Status:* Pending 🔴\n`;
-    txt += `🔴 *Amount Due:* ${formatINR(bill.totalAmount)}\n`;
+    txt += `🔴 *Amount Due:* ${formatINR(bill.totalAmount)} 🔴\n\n`;
   }
 
-  txt += `${divider}\n`;
+  txt += `📎 *Please find your official detailed PDF invoice attached below.*\n\n`;
+  
   if (prefs.whatsappGreeting && prefs.whatsappGreeting.trim()) {
-    txt += `💬 ${prefs.whatsappGreeting}\n`;
-    txt += `${divider}\n`;
+    txt += `💬 _${prefs.whatsappGreeting}_\n`;
   }
-  txt += `_ALPHOVINS GLOBAL AGRO EXPORTS_\n`;
-  txt += `_Generated on ${timestamp}_\n`;
 
   return txt;
 }

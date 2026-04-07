@@ -206,6 +206,18 @@ export function generateBillPDF(bill, traderInfo = null) {
 
   y = doc.lastAutoTable.finalY + 15;
 
+  // ---- CUSTOM GREETING FLAG ----
+  if (trader.whatsappGreeting && trader.whatsappGreeting.trim()) {
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(20, 83, 45);
+    
+    // Auto-wrap greeting text if it's long
+    const greetingLines = doc.splitTextToSize(`"${trader.whatsappGreeting}"`, contentWidth - 10);
+    doc.text(greetingLines, pageWidth / 2, y + 5, { align: 'center' });
+    y += (greetingLines.length * 5) + 5;
+  }
+
   // ---- FOOTER ----
   doc.setDrawColor(200, 200, 200);
   doc.setLineWidth(0.3);
