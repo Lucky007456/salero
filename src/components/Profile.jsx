@@ -110,6 +110,7 @@ export default function Profile({ onNavigate }) {
               </label>
               <input
                 type="number"
+                onWheel={(e) => e.target.blur()}
                 value={prefs.defaultRate}
                 onChange={(e) => setPrefs({ ...prefs, defaultRate: e.target.value })}
                 placeholder="e.g. 15.50"
@@ -142,6 +143,7 @@ export default function Profile({ onNavigate }) {
               </label>
               <input
                 type="number"
+                onWheel={(e) => e.target.blur()}
                 value={prefs.defaultWastage}
                 onChange={(e) => setPrefs({ ...prefs, defaultWastage: e.target.value })}
                 placeholder="e.g. 0.5"

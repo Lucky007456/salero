@@ -224,6 +224,7 @@ export default function BillDetail({ bill, onBack, onUpdate }) {
             {editing ? (
               <input
                 type="number"
+                onWheel={(e) => e.target.blur()}
                 value={editData?.ratePerKg || ''}
                 onChange={(e) => setEditData({ ...editData, ratePerKg: e.target.value })}
                 className="input-field w-32 !py-1.5 !min-h-[32px] text-right text-sm"
@@ -249,6 +250,7 @@ export default function BillDetail({ bill, onBack, onUpdate }) {
                 {editing && editData?.paymentStatus === 'partial' ? (
                   <input
                     type="number"
+                    onWheel={(e) => e.target.blur()}
                     value={editData?.amountPaid || ''}
                     onChange={(e) => setEditData({ ...editData, amountPaid: e.target.value })}
                     className="input-field w-32 !py-1.5 !min-h-[32px] text-right text-sm"

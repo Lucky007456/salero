@@ -401,6 +401,7 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
               <div>
                 <input
                   type="number"
+                  onWheel={(e) => e.target.blur()}
                   value={entry.quantity}
                   onChange={(e) => updateEntry(index, 'quantity', e.target.value)}
                   onKeyDown={(e) => {
@@ -421,6 +422,7 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
               <div>
                 <input
                   type="number"
+                  onWheel={(e) => e.target.blur()}
                   value={entry.weight}
                   onChange={(e) => updateEntry(index, 'weight', e.target.value)}
                   onKeyDown={(e) => handleWeightKeyDown(index, e)}
@@ -472,6 +474,7 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
             </label>
             <input
               type="number"
+              onWheel={(e) => e.target.blur()}
               value={wastage}
               onChange={(e) => setWastage(e.target.value)}
               placeholder="0.00"
@@ -490,6 +493,7 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
             </label>
             <input
               type="number"
+              onWheel={(e) => e.target.blur()}
               value={ratePerKg}
               onChange={(e) => setRatePerKg(e.target.value)}
               placeholder="0.00"
@@ -568,6 +572,7 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
               </label>
               <input
                 type="number"
+                onWheel={(e) => e.target.blur()}
                 value={amountPaid}
                 onChange={(e) => setAmountPaid(e.target.value)}
                 placeholder="0.00"
