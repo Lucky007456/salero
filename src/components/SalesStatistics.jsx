@@ -457,10 +457,12 @@ export default function SalesStatistics({ stats, monthLabel }) {
                   <div className="h-10 w-full mb-2">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={rt.data}>
+                        <XAxis dataKey="date" hide />
                         <YAxis domain={['auto', 'auto']} hide />
                         <RechartsTooltip 
                           cursor={{ stroke: '#065f46', strokeWidth: 1, strokeDasharray: '3 3' }} 
                           content={<RateTooltip />} 
+                          wrapperStyle={{ zIndex: 1000 }}
                         />
                         <Line 
                           type="monotone" 
