@@ -65,6 +65,19 @@ const MoMTooltip = ({ active, payload, label }) => {
   return null;
 };
 
+const RateTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-green-950/95 border border-green-700/50 p-2 rounded shadow-2xl z-50">
+        <p className="text-green-400/80 text-[10px] mb-0.5">{data.date}</p>
+        <p className="text-green-300 text-xs font-bold">₹{data.rate?.toFixed(1) || data.rate}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function SalesStatistics({ stats, monthLabel }) {
   if (!stats || stats.billCount === 0) {
     return (
@@ -445,12 +458,17 @@ export default function SalesStatistics({ stats, monthLabel }) {
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={rt.data}>
                         <YAxis domain={['auto', 'auto']} hide />
+                        <RechartsTooltip 
+                          cursor={{ stroke: '#065f46', strokeWidth: 1, strokeDasharray: '3 3' }} 
+                          content={<RateTooltip />} 
+                        />
                         <Line 
                           type="monotone" 
                           dataKey="rate" 
                           stroke={rt.trend === 'up' ? '#34d399' : '#f87171'} 
                           strokeWidth={2} 
                           dot={false}
+                          activeDot={{ r: 4, fill: '#10b981', stroke: '#064e3b', strokeWidth: 1 }}
                           isAnimationActive={false}
                         />
                       </LineChart>
