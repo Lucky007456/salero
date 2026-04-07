@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar, RefreshCw } from 'lucide-react';
+import { Calendar, RefreshCw, Users } from 'lucide-react';
 import { getAllBills, getAvailableMonths, getBillsByMonth, getSalesStatistics } from '../services/billService';
 import { formatMonthYear, LABELS } from '../utils/format';
 import SalesStatistics from './SalesStatistics';
@@ -9,6 +9,7 @@ export default function SalesStatisticsView() {
   const [loading, setLoading] = useState(true);
   
   const [selectedMonth, setSelectedMonth] = useState(null);
+  const [selectedMerchant, setSelectedMerchant] = useState('');
 
   const loadData = async () => {
     setLoading(true);
@@ -26,13 +27,23 @@ export default function SalesStatisticsView() {
     loadData();
   }, []);
 
-  const availableMonths = useMemo(() => getAvailableMonths(bills), [bills]);
-  const monthBills = useMemo(() => getBillsByMonth(bills, selectedMonth), [bills, selectedMonth]);
+  const uniqueMerchants = useMemo(() => {
+    const merchants = bills.map(b => (b.merchantName || 'Unknown').trim()).filter(Boolean);
+    return [...new Set(merchants)].sort();
+  }, [bills]);
+
+  const merchantFilteredBills = useMemo(() => {
+    if (!selectedMerchant) return bills;
+    return bills.filter(b => (b.merchantName || 'Unknown').trim() === selectedMerchant);
+  }, [bills, selectedMerchant]);
+
+  const availableMonths = useMemo(() => getAvailableMonths(merchantFilteredBills), [merchantFilteredBills]);
+  const monthBills = useMemo(() => getBillsByMonth(merchantFilteredBills, selectedMonth), [merchantFilteredBills, selectedMonth]);
 
   const salesStats = useMemo(() => {
-    if (monthBills.length === 0) return null;
-    return getSalesStatistics(monthBills, bills, selectedMonth);
-  }, [monthBills, bills, selectedMonth]);
+    if (merchantFilteredBills.length === 0) return null;
+    return getSalesStatistics(monthBills.length > 0 ? monthBills : merchantFilteredBills, merchantFilteredBills, selectedMonth);
+  }, [monthBills, merchantFilteredBills, selectedMonth]);
 
   const currentMonthLabel = selectedMonth ? formatMonthYear(selectedMonth) : LABELS.allMonths.en;
 
@@ -61,6 +72,28 @@ export default function SalesStatisticsView() {
           <RefreshCw size={16} />
         </button>
       </div>
+
+      {/* MERCHANT SELECTOR */}
+      {uniqueMerchants.length > 0 && (
+        <div className="glass-card p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Users size={14} className="text-green-400/60" />
+            <p className="text-xs font-semibold text-green-400/70 uppercase tracking-wide">
+              Filter by Merchant / வியாபாரி
+            </p>
+          </div>
+          <select 
+            value={selectedMerchant}
+            onChange={(e) => setSelectedMerchant(e.target.value)}
+            className="select-field w-full sm:w-auto min-w-[250px]"
+          >
+            <option value="">All Merchants</option>
+            {uniqueMerchants.map(m => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* MONTH SELECTOR */}
       {availableMonths.length > 0 && (
