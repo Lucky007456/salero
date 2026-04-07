@@ -45,6 +45,46 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't trigger nav hotkeys if typing in an input
+      if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea') {
+        if (e.key === 'Escape') e.target.blur();
+        return;
+      }
+
+      if (e.ctrlKey) {
+        switch (e.key.toLowerCase()) {
+          case 'n': // Ctrl + N -> New Sale
+            e.preventDefault();
+            handleNavigate('new-sale');
+            break;
+          case 'h': // Ctrl + H -> History
+            e.preventDefault();
+            handleNavigate('history');
+            break;
+          case 's': // Ctrl + S -> Sales Stats
+            e.preventDefault();
+            handleNavigate('sales-stats');
+            break;
+          case 'd': // Ctrl + D -> Dashboard
+            e.preventDefault();
+            handleNavigate('dashboard');
+            break;
+          default:
+            break;
+        }
+      } else if (e.key === 'Escape') {
+        if (currentPage === 'bill-detail') {
+          handleBackFromDetail();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentPage]);
+
   const handleLogin = () => {
     setIsLoggedIn(true);
     localStorage.setItem('isLoggedIn', 'true');
