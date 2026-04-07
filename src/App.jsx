@@ -9,9 +9,12 @@ import BillDetail from './components/BillDetail';
 import Profile from './components/Profile';
 import { TermsView, PrivacyView, RefundView } from './components/LegalPages';
 import './index.css';
+import { auth, isFirebaseConfigured } from './firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [selectedBill, setSelectedBill] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -22,10 +25,28 @@ function App() {
     if (['terms', 'privacy', 'refund'].includes(page)) {
       setCurrentPage(page);
     }
+
+    // Check authentication state
+    const localAuth = localStorage.getItem('isLoggedIn');
+    if (localAuth === 'true') {
+      setIsLoggedIn(true);
+      setAuthChecking(false);
+    } else if (isFirebaseConfigured) {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setIsLoggedIn(true);
+        }
+        setAuthChecking(false);
+      });
+      return () => unsubscribe();
+    } else {
+      setAuthChecking(false);
+    }
   }, []);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
+    localStorage.setItem('isLoggedIn', 'true');
     setCurrentPage('dashboard');
   };
 
@@ -70,6 +91,14 @@ function App() {
   };
 
   const isPublicPage = ['terms', 'privacy', 'refund'].includes(currentPage);
+
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-[#030f05] flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full border-4 border-green-500/20 border-t-green-500 animate-spin"></div>
+      </div>
+    );
+  }
 
   if (!isLoggedIn && !isPublicPage) {
     return <Login onLogin={handleLogin} />;

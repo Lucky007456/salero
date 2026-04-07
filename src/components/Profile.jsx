@@ -45,6 +45,7 @@ export default function Profile({ onNavigate }) {
     if (isFirebaseConfigured) {
       await signOut(auth);
     }
+    localStorage.removeItem('isLoggedIn');
     window.location.reload(); // Reload handles kicking out nicely via App state
   };
 
