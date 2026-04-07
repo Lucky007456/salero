@@ -93,16 +93,36 @@ export async function getAllBills() {
     try {
       const q = query(collection(db, BILLS_COLLECTION), orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({ ...doc.data(), _docId: doc.id }));
+      const all = snapshot.docs.map(doc => ({ ...doc.data(), _docId: doc.id }));
+      return all.filter(b => !b.isDeleted);
     } catch (err) {
       console.error('Firebase fetch error, falling back to local:', err);
     }
   }
   
   // Local fallback
-  return getLocalBills().sort((a, b) => 
-    new Date(b.createdAt) - new Date(a.createdAt)
-  );
+  return getLocalBills()
+    .filter(b => !b.isDeleted)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+// Get deleted bills
+export async function getDeletedBills() {
+  if (isFirebaseConfigured) {
+    try {
+      const q = query(collection(db, BILLS_COLLECTION), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      const all = snapshot.docs.map(doc => ({ ...doc.data(), _docId: doc.id }));
+      return all.filter(b => b.isDeleted).sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt));
+    } catch (err) {
+      console.error('Firebase fetch deleted error:', err);
+    }
+  }
+  
+  // Local fallback
+  return getLocalBills()
+    .filter(b => b.isDeleted)
+    .sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt));
 }
 
 // Get a single bill by docId
@@ -151,14 +171,60 @@ export async function updateBill(docId, updates) {
   return false;
 }
 
-// Delete a bill
+// Delete a bill (Soft Delete)
 export async function deleteBill(docId) {
+  const updates = { isDeleted: true, deletedAt: new Date().toISOString() };
+  if (isFirebaseConfigured) {
+    try {
+      await updateDoc(doc(db, BILLS_COLLECTION, docId), updates);
+      return true;
+    } catch (err) {
+      console.error('Firebase soft delete error, falling back to local:', err);
+    }
+  }
+  
+  // Local fallback
+  const bills = getLocalBills();
+  const idx = bills.findIndex(b => b._docId === docId);
+  if (idx !== -1) {
+    bills[idx] = { ...bills[idx], ...updates };
+    saveLocalBills(bills);
+    return true;
+  }
+  return false;
+}
+
+// Restore a bill
+export async function restoreBill(docId) {
+  const updates = { isDeleted: false, deletedAt: null };
+  if (isFirebaseConfigured) {
+    try {
+      await updateDoc(doc(db, BILLS_COLLECTION, docId), updates);
+      return true;
+    } catch (err) {
+      console.error('Firebase restore error, falling back to local:', err);
+    }
+  }
+  
+  // Local fallback
+  const bills = getLocalBills();
+  const idx = bills.findIndex(b => b._docId === docId);
+  if (idx !== -1) {
+    bills[idx] = { ...bills[idx], ...updates };
+    saveLocalBills(bills);
+    return true;
+  }
+  return false;
+}
+
+// Hard Delete a bill (Permanent)
+export async function hardDeleteBill(docId) {
   if (isFirebaseConfigured) {
     try {
       await deleteDoc(doc(db, BILLS_COLLECTION, docId));
       return true;
     } catch (err) {
-      console.error('Firebase delete error, falling back to local:', err);
+      console.error('Firebase hard delete error, falling back to local:', err);
     }
   }
   

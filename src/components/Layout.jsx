@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  LayoutDashboard, PlusCircle, FileText, BarChart3, LogIn, LogOut, Menu, X, Banana, User 
+  LayoutDashboard, PlusCircle, FileText, BarChart3, LogIn, LogOut, Menu, X, Banana, User, Trash2
 } from 'lucide-react';
 import { auth, isFirebaseConfigured } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -22,6 +22,7 @@ export default function Layout({ children, currentPage, onNavigate }) {
     { id: 'new-sale', label: LABELS.newSale.en, tamil: LABELS.newSale.ta, icon: PlusCircle },
     { id: 'history', label: LABELS.billHistory.en, tamil: LABELS.billHistory.ta, icon: FileText },
     { id: 'sales-stats', label: LABELS.salesStats.en, tamil: LABELS.salesStats.ta, icon: BarChart3 },
+    { id: 'recycle-bin', label: 'Recycle Bin', tamil: 'குப்பை', icon: Trash2 },
   ];
 
   const handleLogout = async () => {
@@ -174,8 +175,8 @@ export default function Layout({ children, currentPage, onNavigate }) {
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl
-                transition-all duration-200 min-w-[64px] ${
+              className={`flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-xl
+                transition-all duration-200 min-w-[56px] ${
                 currentPage === item.id
                   ? 'text-green-400'
                   : 'text-green-600/50'

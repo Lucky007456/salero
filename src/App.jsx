@@ -7,6 +7,7 @@ import BillHistory from './components/BillHistory';
 import SalesStatisticsView from './components/SalesStatisticsView';
 import BillDetail from './components/BillDetail';
 import Profile from './components/Profile';
+import RecycleBin from './components/RecycleBin';
 import { TermsView, PrivacyView, RefundView } from './components/LegalPages';
 import './index.css';
 import { auth, isFirebaseConfigured } from './firebase';
@@ -122,6 +123,8 @@ function App() {
         return <BillHistory key={refreshKey} onViewBill={handleViewBill} />;
       case 'sales-stats':
         return <SalesStatisticsView key={refreshKey} />;
+      case 'recycle-bin':
+        return <RecycleBin key={refreshKey} />;
       case 'profile':
         return <Profile onNavigate={handleNavigate} />;
       case 'terms':
