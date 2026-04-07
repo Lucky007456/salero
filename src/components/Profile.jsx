@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, User, Settings, Globe, LogOut, MapPin, Phone, Building, Mail, Hash } from 'lucide-react';
 import { getPreferences, savePreferences } from '../services/preferenceService';
+import { downloadDatabaseBackup } from '../services/backupService';
 import { auth, isFirebaseConfigured } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { BANANA_VARIETIES } from '../utils/format';
@@ -23,6 +24,7 @@ export default function Profile({ onNavigate }) {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [backingUp, setBackingUp] = useState(false);
   const [message, setMessage] = useState('');
 
   const userEmail = auth?.currentUser?.email || 'admin@salero.com';
@@ -51,6 +53,18 @@ export default function Profile({ onNavigate }) {
     }
     localStorage.removeItem('isLoggedIn');
     window.location.reload(); // Reload handles kicking out nicely via App state
+  };
+
+  const handleBackup = async () => {
+    setBackingUp(true);
+    const success = await downloadDatabaseBackup();
+    if (success) {
+      setMessage('✅ Backup Downloaded Successfully!');
+    } else {
+      setMessage('❌ Backup Failed.');
+    }
+    setBackingUp(false);
+    setTimeout(() => setMessage(''), 4000);
   };
 
   if (loading) {
@@ -231,7 +245,7 @@ export default function Profile({ onNavigate }) {
 
         <div className="pt-4 border-t border-green-800/30 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm font-medium text-emerald-400 h-5">
-            {message}
+            {message && !message.includes('Backup') ? message : ''}
           </p>
           <button type="submit" disabled={saving} className="btn-primary w-full sm:w-auto">
             <Save size={18} />
@@ -239,6 +253,41 @@ export default function Profile({ onNavigate }) {
           </button>
         </div>
       </form>
+
+      {/* System Administration / Backup */}
+      <div className="glass-card p-6 mt-6 border border-emerald-900/50">
+        <div className="flex items-center gap-3 border-b border-green-800/30 pb-4 mb-4">
+          <div className="bg-emerald-900/40 p-2 rounded-lg">
+            <Settings size={22} className="text-emerald-400" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-green-200">System Administration</h3>
+            <p className="text-sm text-green-500/60">Manage your raw data and backups securely.</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <p className="font-semibold text-green-300">Download Database Backup (.json)</p>
+            <p className="text-xs text-green-500/70 mt-1 max-w-sm">
+              Instantly downloads a complete historical copy of all your active bills, deleted bills, and settings. 
+              The system also attempts to automatically download a backup once a month.
+            </p>
+            {message && message.includes('Backup') && (
+              <p className="text-xs font-semibold text-emerald-400 mt-2 fade-in">{message}</p>
+            )}
+          </div>
+          
+          <button 
+            onClick={handleBackup} 
+            disabled={backingUp}
+            className="btn-secondary w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 !px-6"
+          >
+            <Save size={16} />
+            {backingUp ? 'Building Backup...' : 'Download Default Format'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

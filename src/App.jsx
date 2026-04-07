@@ -45,6 +45,43 @@ function App() {
     }
   }, []);
 
+  // Check for auto-backup
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const checkAndTriggerBackup = async () => {
+      const currentMonth = new Date().toISOString().substring(0, 7); // e.g., "2026-04"
+      const lastBackupMonth = localStorage.getItem('last_auto_backup_month');
+
+      if (lastBackupMonth !== currentMonth) {
+        // Prevent duplicate firing by recording immediately
+        localStorage.setItem('last_auto_backup_month', currentMonth);
+        try {
+          const { downloadDatabaseBackup } = await import('./services/backupService.js');
+          await downloadDatabaseBackup();
+        } catch (e) {
+          console.error("Auto backup failed to initialize", e);
+        }
+      }
+    };
+
+    const handleFirstInteraction = () => {
+      checkAndTriggerBackup();
+      // Remove listeners immediately after the first interaction fires
+      window.removeEventListener('click', handleFirstInteraction, { capture: true });
+      window.removeEventListener('touchstart', handleFirstInteraction, { capture: true });
+    };
+
+    // The backup needs user-gesture to prevent popup blocking, wait for first click.
+    window.addEventListener('click', handleFirstInteraction, { capture: true, once: true });
+    window.addEventListener('touchstart', handleFirstInteraction, { capture: true, once: true });
+
+    return () => {
+      window.removeEventListener('click', handleFirstInteraction, { capture: true });
+      window.removeEventListener('touchstart', handleFirstInteraction, { capture: true });
+    };
+  }, [isLoggedIn]);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Don't trigger nav hotkeys if typing in an input
