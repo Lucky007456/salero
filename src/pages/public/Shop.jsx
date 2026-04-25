@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
-import { ShoppingCart, Check, PackageOpen } from 'lucide-react';
+import { ShoppingCart, Check, PackageOpen, HelpCircle, FlaskConical, BarChart3 } from 'lucide-react';
 import { getAvailableProducts } from '../../services/productService';
+import { useCurrency } from '../../context/CurrencyContext';
 
 export default function Shop() {
+  const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { formatPrice } = useCurrency();
   const [addedItems, setAddedItems] = useState({});
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +86,7 @@ export default function Shop() {
                   <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
                     <div>
                       <p className="text-xs text-gray-400 mb-0.5">Price per kg</p>
-                      <p className="font-bold text-green-300 font-mono">₹{product.pricePerKg}</p>
+                      <p className="font-bold text-green-300 font-mono">{formatPrice(product.pricePerKg)}</p>
                     </div>
                     <button 
                       onClick={() => handleAddToCart(product, 'kg')}
@@ -101,7 +105,7 @@ export default function Shop() {
                   <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
                     <div>
                       <p className="text-xs text-gray-400 mb-0.5">Price per Thar (Bunch)</p>
-                      <p className="font-bold text-green-300 font-mono">₹{product.pricePerThar}</p>
+                      <p className="font-bold text-green-300 font-mono">{formatPrice(product.pricePerThar)}</p>
                     </div>
                     <button 
                       onClick={() => handleAddToCart(product, 'thar')}
@@ -113,6 +117,24 @@ export default function Shop() {
                     >
                       {addedItems[`${product.id}-thar`] ? <Check size={16} /> : <ShoppingCart size={16} />}
                       {addedItems[`${product.id}-thar`] ? 'Added' : 'Add Thar'}
+                    </button>
+                  </div>
+
+                  {/* B2B & Sample Actions */}
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <button 
+                      onClick={() => navigate(`/contact?subject=Bulk Quote: ${product.name}`)}
+                      className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 transition-all"
+                    >
+                      <BarChart3 size={14} />
+                      Bulk Quote
+                    </button>
+                    <button 
+                      onClick={() => navigate(`/contact?subject=Sample Request: ${product.name}`)}
+                      className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 transition-all"
+                    >
+                      <FlaskConical size={14} />
+                      Request Sample
                     </button>
                   </div>
                 </div>

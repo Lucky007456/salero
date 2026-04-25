@@ -14,6 +14,7 @@ import Contact from './pages/public/Contact';
 import CustomerLogin from './pages/public/CustomerLogin';
 import CustomerRegister from './pages/public/CustomerRegister';
 import CustomerAccount from './pages/public/CustomerAccount';
+import Blog from './pages/public/Blog';
 
 // Admin Components
 import Dashboard from './components/Dashboard';
@@ -93,6 +94,7 @@ function App() {
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
+        <Route path="/blog" element={<Blog />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/contact" element={<Contact />} />
         

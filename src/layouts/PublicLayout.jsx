@@ -3,17 +3,22 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Store, ShoppingCart, MessageSquare, Menu, X, Info, User } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 import CartDrawer from '../components/public/CartDrawer';
+import WhatsAppWidget from '../components/public/WhatsAppWidget';
+import { Globe } from 'lucide-react';
 
 export default function PublicLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { cartCount, setIsCartOpen } = useCart();
   const { isCustomer, logout } = useAuth();
+  const { currency, setCurrency, currencies } = useCurrency();
 
   const navItems = [
     { id: '/', label: 'Home', icon: Store },
     { id: '/shop', label: 'Shop', icon: ShoppingCart },
+    { id: '/blog', label: 'Insights', icon: Info },
     { id: '/contact', label: 'Contact', icon: MessageSquare },
   ];
 
@@ -58,6 +63,20 @@ export default function PublicLayout() {
             </nav>
 
             <div className="flex items-center gap-3">
+              {/* Currency Selector */}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-medium text-gray-300">
+                <Globe size={14} className="text-green-500/60" />
+                <select 
+                  value={currency} 
+                  onChange={(e) => setCurrency(e.target.value)}
+                  className="bg-transparent border-none focus:ring-0 text-white cursor-pointer"
+                >
+                  {Object.entries(currencies).map(([code, details]) => (
+                    <option key={code} value={code} className="bg-[#020a04]">{details.label}</option>
+                  ))}
+                </select>
+              </div>
+
               <button 
                 onClick={() => setIsCartOpen(true)}
                 className="relative p-2 rounded-xl text-green-400 hover:bg-white/5 transition-colors group"
@@ -121,6 +140,7 @@ export default function PublicLayout() {
       </main>
 
       <CartDrawer />
+      <WhatsAppWidget />
 
       <footer className="w-full bg-[#010602] border-t border-green-900/30 py-12 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

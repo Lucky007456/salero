@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Send, Mail, Phone, MapPin, CheckCircle2, AlertCircle } from 'lucide-react';
 import { submitInquiry } from '../../services/inquiryService';
 
 export default function Contact() {
+  const location = useLocation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -12,6 +14,14 @@ export default function Contact() {
   });
   
   const [status, setStatus] = useState({ loading: false, success: false, error: null });
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const subjectParam = params.get('subject');
+    if (subjectParam) {
+      setFormData(prev => ({ ...prev, subject: subjectParam }));
+    }
+  }, [location]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -165,9 +175,13 @@ export default function Contact() {
                       className="select-field w-full"
                     >
                       <option>Bulk Order Inquiry</option>
+                      <option>Sample Request</option>
                       <option>General Support</option>
                       <option>Partnership</option>
                       <option>Other</option>
+                      {formData.subject && !['Bulk Order Inquiry', 'Sample Request', 'General Support', 'Partnership', 'Other'].includes(formData.subject) && (
+                        <option value={formData.subject}>{formData.subject}</option>
+                      )}
                     </select>
                   </div>
                 </div>
