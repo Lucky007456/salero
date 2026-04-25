@@ -1,182 +1,87 @@
-# 🍌 Banana Cultivation Billing Software — Implementation Plan
+# 🍌 Salero — E-Commerce & Admin Dashboard Implementation Plan
 
 ## Overview
 
-A full-stack billing and bill-tracking web application for a large-scale banana cultivation business in Tamil Nadu, India. The app enables creating sale bills with detailed weight entries, tracking payment statuses, viewing bill history with filters, and exporting professional PDF bills.
+We are transforming **Salero** from an internal billing system into a dual-purpose platform:
+1. **Secure Admin Dashboard**: The existing, robust billing software will be preserved and secured under an `/admin` route. It will continue to handle internal sales, billing history, statistics, and PDF exports without any disruption.
+2. **Public E-Commerce Storefront**: A new public-facing website where customers can browse banana varieties, add them to a cart, purchase them online, and make inquiries.
+
+This approach perfectly separates the "front of house" (customer store) from the "back of house" (internal billing and management), exactly as you envisioned!
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Firebase Authentication**: The plan uses Firebase Auth with Email/Password login. Should we also add Google Sign-In, or is email/password sufficient?
+> **Payment Gateway Selection**: Since the original plan mentioned Tamil Nadu, India, I highly recommend using **Razorpay** for receiving money online. It supports UPI, Credit/Debit cards, and Netbanking out of the box and is the industry standard for Indian businesses. If you prefer **Stripe** or another provider, please let me know.
 
-> [!IMPORTANT]  
-> **Firebase Project**: You are not currently logged into Firebase CLI. I'll set up the app with a local Firebase config placeholder. You'll need to:
-> 1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
-> 2. Enable Firestore and Authentication
-> 3. Paste your Firebase config into the `.env` file
-> 
-> Alternatively, if you want me to create the project via Firebase CLI, please log in first using `firebase login`.
+> [!IMPORTANT]
+> **E-Commerce Scope**: For selling bananas online, do we want to sell by the **Kilogram** or by the **Thar (bunch)**? Do we need to enforce a minimum order quantity (e.g., minimum 5 kg)?
 
 > [!WARNING]
-> **Tailwind CSS Version**: The user requested Tailwind CSS. I'll use **Tailwind CSS v3** (via PostCSS) as it has the most stable React integration. v4 is available but has different setup patterns.
+> **Delivery Logistics**: Online orders typically require delivery addresses and shipping fees. Should we include a standard shipping fee calculation, or is it local pickup only?
 
 ---
 
 ## Proposed Changes
 
-### Phase 1: Project Setup & Foundation
+### Phase 1: Storefront Foundation (In Progress/Completed)
 
-#### [NEW] Project scaffolding with Vite + React
-- Initialize Vite React project in `d:\slaero operation`
-- Install dependencies: `react-router-dom`, `firebase`, `jspdf`, `jspdf-autotable`, `lucide-react`
-- Configure Tailwind CSS v3 with custom green agriculture theme
+The foundational routing has already been successfully split in the application (`App.jsx`), establishing `<PublicLayout>` for the storefront and `<AdminLayout>` for the secure dashboard.
 
-#### [NEW] `src/firebase.js` — Firebase configuration
-- Firebase app initialization with Firestore and Auth
-- Environment variable-based config (`.env` file)
+### Phase 2: Online Shop & Shopping Cart
 
-#### [NEW] `tailwind.config.js` — Custom theme
-- Custom green color palette (emerald/green tones)
-- Large touch-friendly spacing and font sizes
-- Mobile-first breakpoints
+#### [NEW] `src/pages/public/Shop.jsx`
+- Product catalog displaying available banana varieties (Nendran, Robusta, Red Banana, Poovan, G9, Rasthali).
+- Beautiful product cards with images, prices per kg/thar, and "Add to Cart" buttons.
+- Modern, dynamic UI with micro-animations (Framer Motion).
 
-#### [NEW] `src/index.css` — Global styles
-- Tailwind directives + custom utilities
-- Indian Rupee formatting, large button styles
+#### [NEW] `src/context/CartContext.jsx`
+- Global state management for the shopping cart.
+- Add/Remove items, update quantities, and calculate subtotal.
+- Persist cart data in `localStorage` so customers don't lose items if they refresh.
 
----
+#### [NEW] `src/components/public/CartDrawer.jsx`
+- A slide-out sidebar or modal showing current cart contents.
+- "Proceed to Checkout" button.
 
-### Phase 2: New Sale Bill Form
+### Phase 3: Checkout & Online Payments
 
-#### [NEW] `src/components/NewSaleBill.jsx`
-- Merchant name input
-- Date picker (default today)  
-- Banana variety dropdown: Nendran, Robusta, Red Banana, Poovan, G9, Rasthali + Custom
-- **Weight Entry Table**: Dynamic rows with [Quantity (thars)] [Total Weight (kg)]
-  - Add Row / Remove Row
-  - Auto-calculate: Total Quantity & Total Gross Weight
-- Wastage input with validation (≤ gross weight)
-- Auto-calculated: Net Weight = Gross - Wastage
-- Rate per kg (₹) input
-- Auto-calculated: Total Amount = Net Weight × Rate
-- Bill Summary panel
-- Payment status: Paid / Partial / Pending
-  - Partial → amount paid input → balance due
-- Save → generates Bill ID (`BILL-2025-001` format)
+#### [NEW] `src/pages/public/Checkout.jsx`
+- Customer details form (Name, Phone, Email, Delivery Address).
+- Order summary.
+- Integration with payment gateway (e.g., Razorpay standard checkout).
 
-#### [NEW] `src/services/billService.js`
-- Firestore CRUD for bills
-- Bill ID generation with sequential numbering
-- Payment status updates
+#### [NEW] `src/services/paymentService.js`
+- Logic to initialize payment gateway scripts.
+- Verifying payment success and storing the new "Online Order" in Firebase.
 
----
+### Phase 4: Inquiry System
 
-### Phase 3: Bill History / Dashboard
+#### [NEW] `src/pages/public/Contact.jsx`
+- A professional contact form for customers to inquire about bulk orders, specific varieties, or general questions.
+- Fields: Name, Phone Number, Inquiry Type, Message.
+- On submit, saves the inquiry to a new `inquiries` collection in Firebase.
 
-#### [NEW] `src/components/Dashboard.jsx`
-- Summary cards: Total sales (month), Total kg sold, Pending payments
-- Bill list table with: Bill ID, Merchant, Date, Variety, Net Weight, Amount, Status
-- Filters: merchant name, date range, payment status
-- Click row → view/edit bill details
+### Phase 5: Admin Dashboard Expansions
 
-#### [NEW] `src/components/BillDetail.jsx`
-- Full bill detail view
-- Edit capability for all fields
-- Payment status update
+We will add two new sections to your existing Admin Dashboard without changing the core billing logic:
 
----
+#### [NEW] `src/components/admin/OnlineOrders.jsx`
+- A dashboard view for admins to see incoming online orders.
+- Mark orders as "Processing", "Shipped", or "Delivered".
 
-### Phase 4: PDF Export
-
-#### [NEW] `src/services/pdfService.js`
-- Clean, professional bill PDF using jsPDF + autoTable
-- Includes all bill fields: ID, merchant, date, variety, weight table, wastage, net weight, rate, total, payment status
-- Indian format for currency (₹1,25,000)
-- Compact layout suitable for WhatsApp sharing
-
----
-
-### Phase 5: Auth & Polish
-
-#### [NEW] `src/components/Login.jsx`
-- Simple email/password login
-- "Remember me" option
-
-#### [NEW] `src/components/Layout.jsx`
-- App shell with navigation
-- Mobile-friendly bottom nav / sidebar
-- Green agriculture theme
-
-#### [NEW] `src/utils/format.js`
-- Indian number formatting (₹1,25,000)
-- Date formatting
-- Bilingual labels (English / Tamil)
-
----
-
-## Project Structure
-
-```
-d:\slaero operation\
-├── public/
-│   └── index.html
-├── src/
-│   ├── components/
-│   │   ├── Layout.jsx
-│   │   ├── Login.jsx
-│   │   ├── NewSaleBill.jsx
-│   │   ├── Dashboard.jsx
-│   │   ├── BillDetail.jsx
-│   │   └── ui/
-│   │       ├── Button.jsx
-│   │       ├── Input.jsx
-│   │       ├── Select.jsx
-│   │       └── Card.jsx
-│   ├── services/
-│   │   ├── billService.js
-│   │   └── pdfService.js
-│   ├── utils/
-│   │   └── format.js
-│   ├── firebase.js
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── index.css
-├── .env
-├── tailwind.config.js
-├── postcss.config.js
-├── vite.config.js
-└── package.json
-```
-
----
-
-## Open Questions
-
-> [!IMPORTANT]
-> 1. **Firebase Project**: Do you already have a Firebase project created? If yes, please share the Firebase config (apiKey, projectId, etc.). If not, shall I guide you through creating one?
-> 2. **Authentication**: Is email/password login sufficient, or do you need Google Sign-In too?
-> 3. **Multiple Users**: Should multiple users be able to log in, or is this a single-user app?
-> 4. **Offline Support**: Should the app work offline (Firebase offline persistence)?
+#### [NEW] `src/components/admin/Inquiries.jsx`
+- A view to read and manage customer messages submitted from the public contact form.
+- Mark inquiries as "Read" or "Responded".
 
 ---
 
 ## Verification Plan
 
 ### Automated Tests
-- Test all auto-calculations with sample data
-- Validate wastage cannot exceed gross weight
-- Verify Indian currency formatting
-- Test Bill ID generation sequence
-
-### Browser Testing
-- Take screenshots at each milestone:
-  1. Project setup complete with green theme
-  2. New Sale Bill form functional
-  3. Dashboard with sample data
-  4. PDF export output
-- Test on mobile viewport (375px width)
+- Validate cart logic (price calculations, item quantities).
+- Test form validation on the Contact and Checkout pages.
 
 ### Manual Verification
-- Create 3-4 test bills with different varieties and payment statuses
-- Verify PDF output is clean and readable
-- Test all filters on dashboard
+- **Payment Flow**: We will run test transactions in "Test Mode" (via Razorpay or Stripe) to ensure money flows correctly and orders are recorded in Firebase.
+- **Admin Isolation**: Verify that the `/admin` routes remain strictly password-protected and that the internal billing system functions exactly as it did before.
+- **Mobile Responsiveness**: Ensure the storefront looks premium and functions perfectly on mobile devices.

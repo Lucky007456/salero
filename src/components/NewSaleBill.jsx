@@ -11,9 +11,12 @@ import { saveBill } from '../services/billService';
 import { getPreferences } from '../services/preferenceService';
 import WhatsAppShareButton from './WhatsAppShareButton';
 
+import { useNavigate } from 'react-router-dom';
+
 const INITIAL_WEIGHT_ROW = { quantity: '', weight: '' };
 
 export default function NewSaleBill({ onBillSaved, editBill = null }) {
+  const navigate = useNavigate();
   const [merchantName, setMerchantName] = useState(editBill?.merchantName || '');
   const [merchantPhone, setMerchantPhone] = useState(editBill?.merchantPhone || '');
   const [saleDate, setSaleDate] = useState(editBill?.saleDate || getTodayForInput());
@@ -232,7 +235,10 @@ export default function NewSaleBill({ onBillSaved, editBill = null }) {
               New Bill
             </button>
             <button 
-              onClick={() => onBillSaved && onBillSaved(savedBill, 'view')} 
+              onClick={() => {
+                if (onBillSaved) onBillSaved(savedBill, 'view');
+                else navigate(`/admin/bill/${savedBill._docId || savedBill.billId}`, { state: { bill: savedBill } });
+              }} 
               className="btn-secondary flex-1"
             >
               View in History

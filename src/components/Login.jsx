@@ -1,43 +1,33 @@
 import React, { useState } from 'react';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { auth, isFirebaseConfigured } from '../firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-export default function Login({ onLogin }) {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loadingLocal, setLoadingLocal] = useState(false);
+  
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoadingLocal(true);
 
-    if (!isFirebaseConfigured) {
-      // Skip auth if Firebase not configured — go straight to app
-      onLogin();
-      return;
-    }
-
-    setLoading(true);
     try {
-      if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
-      } else {
-        await signInWithEmailAndPassword(auth, email, password);
-      }
-      onLogin();
+      await login(email, password);
+      // Clear any stale local bypass flags
+      localStorage.removeItem('isLoggedIn');
+      navigate('/admin/dashboard');
     } catch (err) {
       setError(err.message.replace('Firebase: ', ''));
     } finally {
-      setLoading(false);
+      setLoadingLocal(false);
     }
-  };
-
-  const handleSkip = () => {
-    onLogin();
   };
 
   return (
@@ -51,9 +41,9 @@ export default function Login({ onLogin }) {
       <div className="w-full max-w-md relative z-10 slide-up">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 
-                        flex items-center justify-center mx-auto mb-4 shadow-glow-lg animate-pulse-glow">
-            <span className="text-4xl">🍌</span>
+          <div className="w-20 h-20 rounded-full overflow-hidden border-3 border-green-500/30 
+                        mx-auto mb-4 shadow-[0_0_25px_rgba(34,197,94,0.3)]">
+            <img src="/logo.png" alt="Alphovins" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-green-300 to-emerald-400 
                        bg-clip-text text-transparent">
@@ -70,7 +60,7 @@ export default function Login({ onLogin }) {
         {/* Login Card */}
         <div className="glass-card p-6 sm:p-8">
           <h2 className="text-xl font-semibold text-green-200 mb-6 text-center">
-            {isSignUp ? 'Create Account' : 'Welcome Back'}
+            Admin Login
           </h2>
 
           {error && (
@@ -88,9 +78,9 @@ export default function Login({ onLogin }) {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
+                  placeholder="admin@salero.com"
                   className="input-field pl-11"
-                  required={isFirebaseConfigured}
+                  required
                 />
               </div>
             </div>
@@ -105,7 +95,7 @@ export default function Login({ onLogin }) {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="input-field pl-11 pr-11"
-                  required={isFirebaseConfigured}
+                  required
                 />
                 <button
                   type="button"
@@ -117,28 +107,16 @@ export default function Login({ onLogin }) {
               </div>
             </div>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full mt-6">
+            <button type="submit" disabled={loadingLocal} className="btn-primary w-full mt-6">
               <LogIn size={20} />
-              {loading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
+              {loadingLocal ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
           <div className="mt-4 text-center">
-            <button
-              onClick={() => { setIsSignUp(!isSignUp); setError(''); }}
-              className="text-green-500/60 hover:text-green-400 text-sm transition-colors"
-            >
-              {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-            </button>
-          </div>
-
-          <div className="mt-6 pt-4 border-t border-green-800/30">
-            <p className="text-xs text-green-500/40 text-center mb-3">
-              Skip login and use local storage
+            <p className="text-green-500/60 text-sm">
+              Authorized personnel only
             </p>
-            <button onClick={handleSkip} className="btn-secondary w-full">
-              Continue without login →
-            </button>
           </div>
         </div>
       </div>

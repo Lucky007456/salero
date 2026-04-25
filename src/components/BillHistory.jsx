@@ -11,7 +11,10 @@ import {
 } from '../utils/format';
 import WhatsAppShareButton from './WhatsAppShareButton';
 
-export default function BillHistory({ onViewBill }) {
+import { useNavigate } from 'react-router-dom';
+
+export default function BillHistory() {
+  const navigate = useNavigate();
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -274,7 +277,7 @@ export default function BillHistory({ onViewBill }) {
                   <tr 
                     key={bill._docId || i}
                     className="border-b border-green-800/10 hover:bg-green-900/20 transition-colors cursor-pointer"
-                    onClick={() => onViewBill(bill)}
+                    onClick={() => navigate(`/admin/bill/${bill._docId || bill.billId}`, { state: { bill } })}
                   >
                     <td className="p-4 text-green-300 font-mono text-sm">{bill.billId}</td>
                     <td className="p-4 text-green-400/60 text-sm">{formatDate(bill.saleDate)}</td>
@@ -289,7 +292,7 @@ export default function BillHistory({ onViewBill }) {
                     <td className="p-4 text-center">
                       <div className="flex items-center justify-center gap-1" onClick={(e) => e.stopPropagation()}>
                         <button 
-                          onClick={() => onViewBill(bill)}
+                          onClick={() => navigate(`/admin/bill/${bill._docId || bill.billId}`, { state: { bill } })}
                           className="p-2 rounded-lg hover:bg-green-800/30 text-green-500/50 hover:text-green-400 transition-colors"
                           title="View"
                         >
@@ -316,7 +319,7 @@ export default function BillHistory({ onViewBill }) {
               <div
                 key={bill._docId || i}
                 className="p-4 hover:bg-green-900/20 transition-colors active:bg-green-900/30"
-                onClick={() => onViewBill(bill)}
+                onClick={() => navigate(`/admin/bill/${bill._docId || bill.billId}`, { state: { bill } })}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-green-400 font-mono text-sm">{bill.billId}</span>

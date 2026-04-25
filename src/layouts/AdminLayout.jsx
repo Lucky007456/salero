@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { 
-  LayoutDashboard, PlusCircle, FileText, BarChart3, LogIn, LogOut, Menu, X, Banana, User, Trash2
+  LayoutDashboard, PlusCircle, FileText, BarChart3, Menu, X, User, Trash2
 } from 'lucide-react';
 import { auth, isFirebaseConfigured } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { LABELS } from '../utils/format';
+import { ShoppingBag, MessageSquare, Package } from 'lucide-react';
 
-export default function Layout({ children, currentPage, onNavigate }) {
+export default function AdminLayout() {
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isFirebaseConfigured) {
@@ -18,72 +21,67 @@ export default function Layout({ children, currentPage, onNavigate }) {
   }, []);
 
   const navItems = [
-    { id: 'dashboard', label: LABELS.dashboard.en, tamil: LABELS.dashboard.ta, icon: LayoutDashboard },
-    { id: 'new-sale', label: LABELS.newSale.en, tamil: LABELS.newSale.ta, icon: PlusCircle },
-    { id: 'history', label: LABELS.billHistory.en, tamil: LABELS.billHistory.ta, icon: FileText },
-    { id: 'sales-stats', label: LABELS.salesStats.en, tamil: LABELS.salesStats.ta, icon: BarChart3 },
-    { id: 'recycle-bin', label: 'Recycle Bin', tamil: 'குப்பை', icon: Trash2 },
+    { id: '/admin/dashboard', label: LABELS.dashboard.en, tamil: LABELS.dashboard.ta, icon: LayoutDashboard },
+    { id: '/admin/new-sale', label: LABELS.newSale.en, tamil: LABELS.newSale.ta, icon: PlusCircle },
+    { id: '/admin/history', label: LABELS.billHistory.en, tamil: LABELS.billHistory.ta, icon: FileText },
+    { id: '/admin/online-orders', label: 'E-Commerce', tamil: 'ஆன்லைன்', icon: ShoppingBag },
+    { id: '/admin/products', label: 'Products', tamil: 'பொருட்கள்', icon: Package },
+    { id: '/admin/inquiries', label: 'Inquiries', tamil: 'விசாரணை', icon: MessageSquare },
+    { id: '/admin/sales-stats', label: LABELS.salesStats.en, tamil: LABELS.salesStats.ta, icon: BarChart3 },
+    { id: '/admin/recycle-bin', label: 'Recycle Bin', tamil: 'குப்பை', icon: Trash2 },
   ];
 
   const handleLogout = async () => {
     if (isFirebaseConfigured) {
       await signOut(auth);
     }
-    onNavigate('login');
+    navigate('/admin/login');
   };
 
   return (
     <div className="min-h-screen bg-[#030f05] flex flex-col">
-      {/* Top Header */}
       <header className="sticky top-0 z-50 bg-green-950/80 backdrop-blur-xl border-b border-green-800/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('dashboard')}>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 
-                            flex items-center justify-center shadow-glow">
-                <span className="text-xl">🍌</span>
-              </div>
+            <NavLink to="/admin/dashboard" className="flex items-center gap-3 cursor-pointer">
+              <img src="/logo.png" alt="Alphovins" className="w-10 h-10 rounded-full object-cover border-2 border-green-500/30 shadow-[0_0_10px_rgba(34,197,94,0.2)]" />
               <div className="flex flex-col">
-                <span className="font-bold text-sm sm:text-lg tracking-tight text-green-300">ALPHOVINS GLOBAL AGRO EXPORTS</span>
+                <span className="font-bold text-sm sm:text-lg tracking-tight text-green-300">ADMIN DASHBOARD</span>
               </div>
-            </div>
+            </NavLink>
 
-            {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map(item => (
-                <button
+                <NavLink
                   key={item.id}
-                  onClick={() => onNavigate(item.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
+                  to={item.id}
+                  className={({ isActive }) => `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
                     transition-all duration-200 ${
-                    currentPage === item.id
+                    isActive
                       ? 'bg-green-600/20 text-green-300 border border-green-600/30'
                       : 'text-green-400/60 hover:text-green-300 hover:bg-green-900/30'
                   }`}
                 >
                   <item.icon size={18} />
                   <span>{item.label}</span>
-                </button>
+                </NavLink>
               ))}
             </nav>
 
-            {/* Right side */}
             <div className="flex items-center gap-3">
               {user && (
-                <button 
-                  onClick={() => onNavigate('profile')}
-                  className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors ${
-                    currentPage === 'profile' 
+                <NavLink 
+                  to="/admin/profile"
+                  className={({ isActive }) => `hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors ${
+                    isActive 
                       ? 'bg-green-600/20 text-green-300 border-green-600/30' 
                       : 'border-transparent text-green-500/70 hover:bg-green-900/40 hover:text-green-300'
                   }`}
                 >
                   <User size={16} />
                   <span className="text-xs font-medium">Profile</span>
-                </button>
+                </NavLink>
               )}
-              {/* Mobile menu button */}
               <button 
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden p-2 rounded-xl text-green-400 hover:bg-green-900/30 transition-colors"
@@ -94,17 +92,17 @@ export default function Layout({ children, currentPage, onNavigate }) {
           </div>
         </div>
 
-        {/* Mobile Nav */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-green-800/30 bg-green-950/95 backdrop-blur-xl fade-in">
             <nav className="px-4 py-3 space-y-1">
               {navItems.map(item => (
-                <button
+                <NavLink
                   key={item.id}
-                  onClick={() => { onNavigate(item.id); setMobileMenuOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left
+                  to={item.id}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) => `w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left
                     transition-all duration-200 ${
-                    currentPage === item.id
+                    isActive
                       ? 'bg-green-600/20 text-green-300 border border-green-600/30'
                       : 'text-green-400/60 hover:text-green-300 hover:bg-green-900/30'
                   }`}
@@ -114,15 +112,16 @@ export default function Layout({ children, currentPage, onNavigate }) {
                     <span className="block font-medium">{item.label}</span>
                     <span className="block text-xs text-green-600/50">{item.tamil}</span>
                   </div>
-                </button>
+                </NavLink>
               ))}
               
               {user && (
-                 <button
-                  onClick={() => { onNavigate('profile'); setMobileMenuOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left border-t border-green-800/20 mt-2
+                 <NavLink
+                  to="/admin/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) => `w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left border-t border-green-800/20 mt-2
                     transition-all duration-200 ${
-                    currentPage === 'profile'
+                    isActive
                       ? 'bg-green-600/20 text-green-300'
                       : 'text-green-400/60 hover:text-green-300 hover:bg-green-900/30'
                   }`}
@@ -132,64 +131,39 @@ export default function Layout({ children, currentPage, onNavigate }) {
                     <span className="block font-medium">Admin Profile</span>
                     <span className="block text-xs text-green-600/50">சுயவிவரம்</span>
                   </div>
-                </button>
+                </NavLink>
               )}
             </nav>
           </div>
         )}
       </header>
 
-      {/* Main Content */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {children}
+        <Outlet />
       </main>
 
-      {/* Global Footer (Compliance) */}
-      <footer className="w-full max-w-7xl mx-auto px-4 py-8 border-t border-green-800/30 mt-auto">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="text-center md:text-left">
-            <p className="text-xs text-green-500/50">
-              &copy; {new Date().getFullYear()} ALPHOVINS GLOBAL AGRO EXPORTS. All rights reserved.
-            </p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-4 text-xs font-medium">
-            <button onClick={() => onNavigate('terms')} className="text-green-400/60 hover:text-green-300 transition-colors">
-              Terms & Conditions
-            </button>
-            <button onClick={() => onNavigate('privacy')} className="text-green-400/60 hover:text-green-300 transition-colors">
-              Privacy Policy
-            </button>
-            <button onClick={() => onNavigate('refund')} className="text-green-400/60 hover:text-green-300 transition-colors">
-              Refund Policy
-            </button>
-          </div>
-        </div>
-      </footer>
-
-      {/* Bottom Mobile Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 
                       bg-green-950/90 backdrop-blur-xl border-t border-green-800/30 
                       safe-bottom">
         <div className="flex items-center justify-around py-2">
           {navItems.map(item => (
-            <button
+            <NavLink
               key={item.id}
-              onClick={() => onNavigate(item.id)}
-              className={`flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-xl
+              to={item.id}
+              className={({ isActive }) => `flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-xl
                 transition-all duration-200 min-w-[56px] ${
-                currentPage === item.id
+                isActive
                   ? 'text-green-400'
                   : 'text-green-600/50'
               }`}
             >
               <item.icon size={22} />
               <span className="text-[10px] font-medium">{item.label}</span>
-            </button>
+            </NavLink>
           ))}
         </div>
       </nav>
 
-      {/* Bottom padding for mobile nav */}
       <div className="md:hidden h-20" />
     </div>
   );

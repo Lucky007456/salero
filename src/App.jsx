@@ -1,60 +1,67 @@
 import React, { useState, useEffect } from 'react';
-import Layout from './components/Layout';
-import Login from './components/Login';
-import NewSaleBill from './components/NewSaleBill';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+
+// Layouts
+import PublicLayout from './layouts/PublicLayout';
+import AdminLayout from './layouts/AdminLayout';
+
+// Public Pages
+import Home from './pages/public/Home';
+import Shop from './pages/public/Shop';
+import Checkout from './pages/public/Checkout';
+import Contact from './pages/public/Contact';
+import CustomerLogin from './pages/public/CustomerLogin';
+import CustomerRegister from './pages/public/CustomerRegister';
+import CustomerAccount from './pages/public/CustomerAccount';
+
+// Admin Components
 import Dashboard from './components/Dashboard';
+import NewSaleBill from './components/NewSaleBill';
+import Profile from './components/Profile';
+import BillDetailWrapper from './components/BillDetailWrapper';
+import OnlineOrders from './components/admin/OnlineOrders';
+import Inquiries from './components/admin/Inquiries';
+import ProductManager from './components/admin/ProductManager';
 import BillHistory from './components/BillHistory';
 import SalesStatisticsView from './components/SalesStatisticsView';
-import BillDetail from './components/BillDetail';
-import Profile from './components/Profile';
 import RecycleBin from './components/RecycleBin';
+import Login from './components/Login';
 import { TermsView, PrivacyView, RefundView } from './components/LegalPages';
-import './index.css';
-import { auth, isFirebaseConfigured } from './firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+
+// Optional: Fallback loading component
+const LoadingScreen = () => (
+  <div className="min-h-screen bg-[#030f05] flex items-center justify-center">
+    <div className="w-12 h-12 rounded-full border-4 border-green-500/20 border-t-green-500 animate-spin"></div>
+  </div>
+);
+
+// Protected Route Wrapper for Admin
+const AdminProtectedRoute = ({ isAdmin, loading, children }) => {
+  if (loading) return <LoadingScreen />;
+  if (!isAdmin) return <Navigate to="/admin/login" replace />;
+  return children;
+};
+
+// Protected Route Wrapper for Customers
+const CustomerProtectedRoute = ({ isCustomer, loading, children }) => {
+  if (loading) return <LoadingScreen />;
+  if (!isCustomer) return <Navigate to="/login" replace />;
+  return children;
+};
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [authChecking, setAuthChecking] = useState(true);
-  const [currentPage, setCurrentPage] = useState('dashboard');
-  const [selectedBill, setSelectedBill] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const page = params.get('page');
-    if (['terms', 'privacy', 'refund'].includes(page)) {
-      setCurrentPage(page);
-    }
-
-    // Check authentication state
-    const localAuth = localStorage.getItem('isLoggedIn');
-    if (localAuth === 'true') {
-      setIsLoggedIn(true);
-      setAuthChecking(false);
-    } else if (isFirebaseConfigured) {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          setIsLoggedIn(true);
-        }
-        setAuthChecking(false);
-      });
-      return () => unsubscribe();
-    } else {
-      setAuthChecking(false);
-    }
-  }, []);
+  const { isAdmin, isCustomer, loading } = useAuth();
 
   // Check for auto-backup
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (!isAdmin) return;
 
     const checkAndTriggerBackup = async () => {
-      const currentMonth = new Date().toISOString().substring(0, 7); // e.g., "2026-04"
+      const currentMonth = new Date().toISOString().substring(0, 7);
       const lastBackupMonth = localStorage.getItem('last_auto_backup_month');
 
       if (lastBackupMonth !== currentMonth) {
-        // Prevent duplicate firing by recording immediately
         localStorage.setItem('last_auto_backup_month', currentMonth);
         try {
           const { downloadDatabaseBackup } = await import('./services/backupService.js');
@@ -67,12 +74,10 @@ function App() {
 
     const handleFirstInteraction = () => {
       checkAndTriggerBackup();
-      // Remove listeners immediately after the first interaction fires
       window.removeEventListener('click', handleFirstInteraction, { capture: true });
       window.removeEventListener('touchstart', handleFirstInteraction, { capture: true });
     };
 
-    // The backup needs user-gesture to prevent popup blocking, wait for first click.
     window.addEventListener('click', handleFirstInteraction, { capture: true, once: true });
     window.addEventListener('touchstart', handleFirstInteraction, { capture: true, once: true });
 
@@ -80,146 +85,69 @@ function App() {
       window.removeEventListener('click', handleFirstInteraction, { capture: true });
       window.removeEventListener('touchstart', handleFirstInteraction, { capture: true });
     };
-  }, [isLoggedIn]);
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      // Don't trigger nav hotkeys if typing in an input
-      if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea') {
-        if (e.key === 'Escape') e.target.blur();
-        return;
-      }
-
-      if (e.ctrlKey) {
-        switch (e.key.toLowerCase()) {
-          case 'n': // Ctrl + N -> New Sale
-            e.preventDefault();
-            handleNavigate('new-sale');
-            break;
-          case 'h': // Ctrl + H -> History
-            e.preventDefault();
-            handleNavigate('history');
-            break;
-          case 's': // Ctrl + S -> Sales Stats
-            e.preventDefault();
-            handleNavigate('sales-stats');
-            break;
-          case 'd': // Ctrl + D -> Dashboard
-            e.preventDefault();
-            handleNavigate('dashboard');
-            break;
-          default:
-            break;
-        }
-      } else if (e.key === 'Escape') {
-        if (currentPage === 'bill-detail') {
-          handleBackFromDetail();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentPage]);
-
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    localStorage.setItem('isLoggedIn', 'true');
-    setCurrentPage('dashboard');
-  };
-
-  const handleNavigate = (page) => {
-    if (['terms', 'privacy', 'refund'].includes(page)) {
-      window.history.pushState({}, '', `?page=${page}`);
-      setCurrentPage(page);
-      return;
-    }
-    // Clear URL params if navigating back to main app
-    if (window.location.search) {
-      window.history.pushState({}, '', window.location.pathname);
-    }
-    setCurrentPage(page);
-    setSelectedBill(null);
-    if (page === 'dashboard' || page === 'history' || page === 'sales-stats') {
-      setRefreshKey(k => k + 1);
-    }
-  };
-
-  const handleBillSaved = (bill, action) => {
-    if (action === 'view') {
-      setCurrentPage('dashboard');
-      setRefreshKey(k => k + 1);
-    }
-  };
-
-  const handleViewBill = (bill) => {
-    setSelectedBill(bill);
-    setCurrentPage('bill-detail');
-  };
-
-  const handleBackFromDetail = () => {
-    setSelectedBill(null);
-    setCurrentPage('dashboard');
-    setRefreshKey(k => k + 1);
-  };
-
-  const handleBillUpdated = () => {
-    setRefreshKey(k => k + 1);
-    handleBackFromDetail();
-  };
-
-  const isPublicPage = ['terms', 'privacy', 'refund'].includes(currentPage);
-
-  if (authChecking) {
-    return (
-      <div className="min-h-screen bg-[#030f05] flex items-center justify-center">
-        <div className="w-12 h-12 rounded-full border-4 border-green-500/20 border-t-green-500 animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (!isLoggedIn && !isPublicPage) {
-    return <Login onLogin={handleLogin} />;
-  }
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'new-sale':
-        return <NewSaleBill onBillSaved={handleBillSaved} />;
-      case 'bill-detail':
-        return selectedBill ? (
-          <BillDetail 
-            bill={selectedBill} 
-            onBack={handleBackFromDetail} 
-            onUpdate={handleBillUpdated}
-          />
-        ) : (
-          <Dashboard key={refreshKey} onViewBill={handleViewBill} />
-        );
-      case 'history':
-        return <BillHistory key={refreshKey} onViewBill={handleViewBill} />;
-      case 'sales-stats':
-        return <SalesStatisticsView key={refreshKey} />;
-      case 'recycle-bin':
-        return <RecycleBin key={refreshKey} />;
-      case 'profile':
-        return <Profile onNavigate={handleNavigate} />;
-      case 'terms':
-        return <TermsView onNavigate={handleNavigate} />;
-      case 'privacy':
-        return <PrivacyView onNavigate={handleNavigate} />;
-      case 'refund':
-        return <RefundView onNavigate={handleNavigate} />;
-      case 'dashboard':
-      default:
-        return <Dashboard key={refreshKey} onViewBill={handleViewBill} onNavigate={handleNavigate} />;
-    }
-  };
+  }, [isAdmin]);
 
   return (
-    <Layout currentPage={currentPage} onNavigate={handleNavigate}>
-      {renderPage()}
-    </Layout>
+    <Routes>
+      {/* Public Storefront Routes */}
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/contact" element={<Contact />} />
+        
+        {/* Customer Auth Pages */}
+        <Route path="/login" element={
+          isCustomer ? <Navigate to="/account" replace /> : <CustomerLogin />
+        } />
+        <Route path="/register" element={
+          isCustomer ? <Navigate to="/account" replace /> : <CustomerRegister />
+        } />
+        
+        {/* Customer Dashboard */}
+        <Route path="/account" element={
+          <CustomerProtectedRoute isCustomer={isCustomer} loading={loading}>
+            <CustomerAccount />
+          </CustomerProtectedRoute>
+        } />
+        
+        {/* Legal Pages */}
+        <Route path="/terms" element={<TermsView />} />
+        <Route path="/privacy" element={<PrivacyView />} />
+        <Route path="/refund" element={<RefundView />} />
+      </Route>
+
+      {/* Admin Login */}
+      <Route path="/admin/login" element={
+        isAdmin ? <Navigate to="/admin/dashboard" replace /> : <Login />
+      } />
+
+      {/* Admin Dashboard Routes */}
+      <Route path="/admin" element={
+        <AdminProtectedRoute isAdmin={isAdmin} loading={loading}>
+          <AdminLayout />
+        </AdminProtectedRoute>
+      }>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="new-sale" element={<NewSaleBill />} />
+        <Route path="history" element={<BillHistory />} />
+        <Route path="online-orders" element={<OnlineOrders />} />
+        <Route path="products" element={<ProductManager />} />
+        <Route path="inquiries" element={<Inquiries />} />
+        <Route path="bill/:id" element={<BillDetailWrapper />} />
+        <Route path="sales-stats" element={<SalesStatisticsView />} />
+        <Route path="recycle-bin" element={<RecycleBin />} />
+        <Route path="profile" element={<Profile />} />
+      </Route>
+
+      {/* 404 Not Found */}
+      <Route path="*" element={
+        <div className="min-h-screen bg-[#030f05] flex items-center justify-center text-green-300 text-2xl font-bold">
+          404 - Page Not Found
+        </div>
+      } />
+    </Routes>
   );
 }
 

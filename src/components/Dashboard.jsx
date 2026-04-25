@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   TrendingUp, Weight, AlertCircle, FileText, ChevronRight, Eye, RefreshCw
 } from 'lucide-react';
@@ -8,7 +9,8 @@ import {
   BANANA_VARIETIES, LABELS 
 } from '../utils/format';
 
-export default function Dashboard({ onViewBill, onNavigate }) {
+export default function Dashboard() {
+  const navigate = useNavigate();
   const [bills, setBills] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -149,7 +151,7 @@ export default function Dashboard({ onViewBill, onNavigate }) {
             <p className="text-[10px] text-green-500/40 mt-0.5">சமீபத்திய பில்கள்</p>
           </div>
           <button 
-            onClick={() => onNavigate('history')}
+            onClick={() => navigate('/admin/history')}
             className="flex items-center gap-1 text-xs text-green-400/80 hover:text-green-300 transition-colors py-1.5 px-3 rounded-lg hover:bg-green-800/30"
           >
             View All <ChevronRight size={14} />
@@ -167,7 +169,7 @@ export default function Dashboard({ onViewBill, onNavigate }) {
               <div
                 key={bill._docId || i}
                 className="p-4 flex items-center justify-between hover:bg-green-900/20 transition-colors cursor-pointer group"
-                onClick={() => onViewBill(bill)}
+                onClick={() => navigate(`/admin/bill/${bill._docId || bill.billId}`, { state: { bill } })}
               >
                 <div className="flex items-center gap-4">
                   <div className="hidden sm:flex w-10 h-10 rounded-full bg-green-900/40 items-center justify-center border border-green-800/30">
