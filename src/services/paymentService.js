@@ -3,47 +3,127 @@ import { db, isFirebaseConfigured } from '../firebase';
 
 const ORDERS_COLLECTION = 'online_orders';
 
-// Function to simulate initializing Razorpay checkout
+// Helper function to load Razorpay script
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
+// Function to initialize real Razorpay checkout
 export const initializePayment = async (amount, customerDetails, cartItems, uid, onSuccess, onError) => {
-  // In a real application, you would:
-  // 1. Call your backend to create a Razorpay Order ID.
-  // 2. Load the Razorpay SDK script.
-  // 3. Open the Razorpay checkout modal with the Order ID.
   
-  // Since we don't have a backend here, we will simulate a successful payment delay.
-  console.log('Initiating payment for:', amount);
-  
-  setTimeout(async () => {
-    try {
-      // Simulate success
-      const paymentId = 'pay_' + Math.random().toString(36).substr(2, 9);
-      
-      const orderData = {
-        uid: uid || null,
-        customerDetails,
-        cartItems,
-        totalAmount: amount,
-        paymentId,
-        paymentStatus: 'paid', // paid, failed
-        orderStatus: 'Processing', // Processing, Shipped, Delivered
-        createdAt: isFirebaseConfigured ? serverTimestamp() : new Date().toISOString(),
-      };
-
-      if (isFirebaseConfigured) {
-        await addDoc(collection(db, ORDERS_COLLECTION), orderData);
-      } else {
-        // Fallback to local storage for demo
-        const existing = JSON.parse(localStorage.getItem('salero_online_orders') || '[]');
-        existing.push({ ...orderData, id: 'local_' + Date.now(), createdAt: new Date().toISOString() });
-        localStorage.setItem('salero_online_orders', JSON.stringify(existing));
-      }
-
-      onSuccess(paymentId);
-    } catch (err) {
-      console.error("Payment recording failed:", err);
-      onError("Failed to record payment. Please contact support.");
+  try {
+    const isLoaded = await loadRazorpayScript();
+    if (!isLoaded) {
+      onError("Razorpay SDK failed to load. Check your internet connection.");
+      return;
     }
-  }, 2000); // Simulate network delay
+
+    // 1. Create order on backend
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    
+    const response = await fetch(`${API_URL}/api/create-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        amount: Math.round(amount * 100), // convert to paise
+        currency: 'INR'
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to create order');
+    }
+
+    const { order_id, amount: orderAmount, currency } = await response.json();
+
+    // 2. Open Razorpay Checkout Modal
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: orderAmount,
+      currency: currency,
+      name: "ALPHOVINS GLOBAL AGRO EXPORTS",
+      description: "Premium Agro Exports Payment",
+      image: "/logo.png",
+      order_id: order_id,
+      handler: async function (response) {
+        // 3. Verify payment on backend
+        try {
+          const verifyResponse = await fetch(`${API_URL}/api/verify-payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
+
+          const verifyData = await verifyResponse.json();
+
+          if (verifyData.success) {
+            // Payment verified, record the order
+            const orderData = {
+              uid: uid || null,
+              customerDetails,
+              cartItems,
+              totalAmount: amount,
+              paymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+              paymentStatus: 'paid',
+              orderStatus: 'Processing',
+              createdAt: isFirebaseConfigured ? serverTimestamp() : new Date().toISOString(),
+            };
+
+            if (isFirebaseConfigured) {
+              await addDoc(collection(db, ORDERS_COLLECTION), orderData);
+            } else {
+              const existing = JSON.parse(localStorage.getItem('salero_online_orders') || '[]');
+              existing.push({ ...orderData, id: 'local_' + Date.now(), createdAt: new Date().toISOString() });
+              localStorage.setItem('salero_online_orders', JSON.stringify(existing));
+            }
+
+            onSuccess(response.razorpay_payment_id);
+          } else {
+            onError("Payment verification failed: " + verifyData.message);
+          }
+        } catch (err) {
+          console.error("Verification error:", err);
+          onError("An error occurred during payment verification.");
+        }
+      },
+      prefill: {
+        name: customerDetails.name,
+        email: customerDetails.email,
+        contact: customerDetails.phone,
+      },
+      theme: {
+        color: "#22c55e", // green-500
+      },
+      modal: {
+        ondismiss: function() {
+          console.log("Payment modal closed by user");
+        }
+      }
+    };
+
+    const rzp1 = new window.Razorpay(options);
+    
+    rzp1.on('payment.failed', function (response) {
+      onError("Payment failed: " + response.error.description);
+    });
+
+    rzp1.open();
+  } catch (error) {
+    console.error("Payment initiation error:", error);
+    onError(error.message || "Failed to initiate payment.");
+  }
 };
 
 // Function to fetch online orders (for the Admin Dashboard)
