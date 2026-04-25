@@ -25,9 +25,9 @@ export const initializePayment = async (amount, customerDetails, cartItems, uid,
     }
 
     // 1. Create order on backend
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-    
-    const response = await fetch(`${API_URL}/api/create-order`, {
+    // We use a relative path so it automatically works on Vercel (serverless functions)
+    // Locally, Vite's proxy will route it to the Express server.
+    const response = await fetch(`/api/create-order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -55,7 +55,7 @@ export const initializePayment = async (amount, customerDetails, cartItems, uid,
       handler: async function (response) {
         // 3. Verify payment on backend
         try {
-          const verifyResponse = await fetch(`${API_URL}/api/verify-payment`, {
+          const verifyResponse = await fetch(`/api/verify-payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
